@@ -12,11 +12,13 @@ import Loading from '../LoadingComponent/Loading';
 import * as Message from '../../components/Message/Message'
 import { useQuery } from '@tanstack/react-query';
 import { DrawComponent } from '../DrawComponent/DrawComponent';
+import { useSelector } from 'react-redux';
 
 const AdminProduct = () => {
+    const user = useSelector((state) => state?.user)
     const [rowSelected, setRowSelected] = useState('')
     const [isOpenDraw, setIsOpenDraw] = useState(false)
-    const [isPendingUpdate, setIsPeingUpdate] = useState(false)
+    const [isPendingUpdate, setIsPendingUpdate] = useState(false)
     const [stateProduct, setStateProduct] = useState({
         name: '',
         type: '',
@@ -60,6 +62,7 @@ const AdminProduct = () => {
         }
     );
     const mutationUpdate = useMutationHooks(
+
         (data) => {
             const {
                 id,
@@ -73,8 +76,6 @@ const AdminProduct = () => {
             return res
         }
     );
-
-
     const handleOnChange = (e) => {
         setStateProduct({
             ...stateProduct,
@@ -93,44 +94,37 @@ const AdminProduct = () => {
     }
 
     const fetchGetDetailsProduct = async (rowSelected) => {
-        try {
-            const res = await ProductServices.getDetailsProduct(rowSelected);
-            if (res?.data) {
-                setStateProductDetail({
-                    name: res?.data?.name,
-                    type: res?.data?.type,
-                    price: res?.data?.price,
-                    image: res?.data?.image,
-                    countInStock: res?.data?.countInStock,
-                    rating: res?.data?.rating,
-                    description: res?.data?.description
-                });
-            }
-
-        } catch (error) {
-            console.error('Error fetching product details:', error);
-            // Xử lý lỗi ở đây (ví dụ: thông báo lỗi cho người dùng)
+        const res = await ProductServices.getDetailsProduct(rowSelected);
+        if (res?.data) {
+            setStateProductDetail({
+                name: res?.data?.name,
+                type: res?.data?.type,
+                price: res?.data?.price,
+                countInStock: res?.data?.countInStock,
+                description: res?.data?.description,
+                rating: res?.data?.rating,
+                image: res?.data?.image,
+            })
         }
-        setIsPeingUpdate(false)
+        setIsPendingUpdate(false)
     }
+    useEffect(() => {
+        form.setFieldsValue(stateProductDetail)
+    }, [form, stateProductDetail])
 
-    console.log('stateProductDetail', stateProductDetail)
     useEffect(() => {
         if (rowSelected) {
             fetchGetDetailsProduct(rowSelected)
         }
     }, [rowSelected])
-    useEffect(() => {
-        form.setFieldsValue(stateProductDetail)
-    }, [form, stateProductDetail])
 
     const handleDetailsProduct = () => {
         if (rowSelected) {
-            setIsPeingUpdate(true)
+            setIsPendingUpdate(true)
             fetchGetDetailsProduct()
-            setIsOpenDraw(true)
-        }
 
+        }
+        setIsOpenDraw(true)
     }
     const { data, isPending, isSuccess, isError } = mutation
     const { data: dataUpdated, isSuccess: isSuccessUpdated, isError: isErrorUpdated, isPending: isPendingUpdated } = mutationUpdate
@@ -142,7 +136,6 @@ const AdminProduct = () => {
                 <EditOutlined style={{ padding: '0 10px', color: 'blue' }} onClick={handleDetailsProduct} />
             </div>
         )
-
     }
     const columns = [
         {
@@ -191,6 +184,28 @@ const AdminProduct = () => {
             Message.error()
         }
     }, [isSuccess, isError, data])
+    useEffect(() => {
+
+        if (isSuccessUpdated && data?.status === 'thành công') {
+            Message.success()
+            handleCloseDrawer()
+        } else if (isErrorUpdated) {
+            Message.error()
+        }
+    }, [isSuccessUpdated, isErrorUpdated, data])
+    const handleCloseDrawer = () => {
+        setIsOpenDraw(false);
+        setStateProductDetail({
+            name: '',
+            type: '',
+            price: '',
+            image: '',
+            countInStock: '',
+            rating: '',
+            description: '',
+        })
+        form.resetFields()
+    };
     const [isModalOpen, setIsModalOpen] = useState(false);
     const handleCancel = () => {
         setIsModalOpen(false);
@@ -206,7 +221,7 @@ const AdminProduct = () => {
         form.resetFields()
     };
     const onFinish = () => {
-        mutation.mutate(stateProduct)
+        mutation.mutate({ stateProduct })
     };
 
     const handleOnchangeAvatar = async ({ fileList }) => {
@@ -229,8 +244,9 @@ const AdminProduct = () => {
             image: file.preview
         });
     }
+    console.log("user", user)
     const onUpdateProduct = () => {
-
+        mutationUpdate.mutate({ id: rowSelected, token: user?.access_token, stateProductDetail })
     }
     return (
         <div>
