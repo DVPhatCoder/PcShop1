@@ -184,12 +184,14 @@ const AdminProduct = () => {
     }, [isSuccess, isError, data])
     useEffect(() => {
         if (isSuccessUpdated && dataUpdated?.status === 'thành công') {
-            Message.success()
-            handleCloseDrawer()
-        } else if (isErrorUpdated) {
-            Message.error()
+            Message.success('Cập nhật thành công!');
+            handleCloseDrawer();
+        } else if (isErrorUpdated && dataUpdated?.status === 'Lỗi') {
+            Message.error(dataUpdated?.message || 'Có lỗi xảy ra khi cập nhật!');
         }
-    }, [isSuccessUpdated, isErrorUpdated, dataUpdated])
+    }, [isSuccessUpdated, isErrorUpdated, dataUpdated]);
+
+
     const handleCloseDrawer = () => {
         setIsOpenDraw(false);
         setStateProductDetail({
@@ -243,18 +245,12 @@ const AdminProduct = () => {
     }
     console.log("user", user)
     const onUpdateProduct = () => {
-        form.validateFields().then((values) => {
-            const updatedData = {
-                ...values,
-                image: stateProductDetail.image // Nếu có ảnh ngoài form
-            };
-            console.log("Dữ liệu cập nhật:", updatedData);  // Log dữ liệu trước khi gửi
-            mutationUpdate.mutate({ id: rowSelected, token: user?.access_token, ...updatedData });
-        }).catch((errorInfo) => {
-            console.log('Validate Failed:', errorInfo);
+        mutationUpdate.mutate({
+            id: rowSelected,
+            token: user?.access_token,
+            ...stateProductDetail
         });
     };
-
     return (
         <div>
             <div>
