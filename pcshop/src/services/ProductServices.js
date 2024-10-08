@@ -17,9 +17,8 @@ export const getDetailsProduct = async (id) => {
 export const updateProduct = async (id, data, access_token) => {
     const res = await axiosJWT.put(`${process.env.REACT_APP_API_URL}/product/update/${id}`, data, {
         headers: {
-            token: `Beare ${access_token}`,
-        }
-    })
-
-    return res.data
-}
+            token: `Bearer ${access_token}`,
+        },
+    });
+    return res.data;
+};

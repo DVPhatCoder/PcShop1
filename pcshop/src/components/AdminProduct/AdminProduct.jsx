@@ -62,20 +62,19 @@ const AdminProduct = () => {
         }
     );
     const mutationUpdate = useMutationHooks(
-
-        (data) => {
-            const {
-                id,
-                token,
-                ...rests
-            } = data;
-            const res = ProductServices.updateProduct(
-                id,
-                token,
-                rests,)
-            return res
+        async (data) => {
+            try {
+                const { id, token, ...rests } = data;
+                const res = await ProductServices.updateProduct(id, { ...rests }, token);
+                console.log("Phản hồi API:", res);  // Kiểm tra phản hồi API
+                return res;
+            } catch (error) {
+                console.error("Lỗi khi update sản phẩm:", error.response?.data || error.message);
+            }
         }
     );
+
+
     const handleOnChange = (e) => {
         setStateProduct({
             ...stateProduct,
@@ -122,12 +121,12 @@ const AdminProduct = () => {
         if (rowSelected) {
             setIsPendingUpdate(true)
             fetchGetDetailsProduct()
-
         }
         setIsOpenDraw(true)
     }
     const { data, isPending, isSuccess, isError } = mutation
     const { data: dataUpdated, isSuccess: isSuccessUpdated, isError: isErrorUpdated, isPending: isPendingUpdated } = mutationUpdate
+    console.log('dataUpdated', dataUpdated)
     const { data: products, isPending: isLoadingProducts } = useQuery({ queryKey: ['products'], queryFn: getAllProduct });
     const renderAction = () => {
         return (
@@ -176,7 +175,6 @@ const AdminProduct = () => {
         }
     })
     useEffect(() => {
-
         if (isSuccess && data?.status === 'thành công') {
             Message.success()
             handleCancel()
@@ -185,14 +183,13 @@ const AdminProduct = () => {
         }
     }, [isSuccess, isError, data])
     useEffect(() => {
-
-        if (isSuccessUpdated && data?.status === 'thành công') {
+        if (isSuccessUpdated && dataUpdated?.status === 'thành công') {
             Message.success()
             handleCloseDrawer()
         } else if (isErrorUpdated) {
             Message.error()
         }
-    }, [isSuccessUpdated, isErrorUpdated, data])
+    }, [isSuccessUpdated, isErrorUpdated, dataUpdated])
     const handleCloseDrawer = () => {
         setIsOpenDraw(false);
         setStateProductDetail({
@@ -234,8 +231,8 @@ const AdminProduct = () => {
             image: file.preview
         });
     }
-    const handleOnchangeAvatarDetail = async ({ fileLists }) => {
-        const file = fileLists[0]
+    const handleOnchangeAvatarDetail = async ({ fileList }) => {
+        const file = fileList[0]
         if (!file.url && !file.preview) {
             file.preview = await getBase64(file.originFileObj);
         }
@@ -246,8 +243,18 @@ const AdminProduct = () => {
     }
     console.log("user", user)
     const onUpdateProduct = () => {
-        mutationUpdate.mutate({ id: rowSelected, token: user?.access_token, stateProductDetail })
-    }
+        form.validateFields().then((values) => {
+            const updatedData = {
+                ...values,
+                image: stateProductDetail.image // Nếu có ảnh ngoài form
+            };
+            console.log("Dữ liệu cập nhật:", updatedData);  // Log dữ liệu trước khi gửi
+            mutationUpdate.mutate({ id: rowSelected, token: user?.access_token, ...updatedData });
+        }).catch((errorInfo) => {
+            console.log('Validate Failed:', errorInfo);
+        });
+    };
+
     return (
         <div>
             <div>
@@ -384,7 +391,7 @@ const AdminProduct = () => {
                     </Loading>
                 </Modal>
                 <DrawComponent title='Chi tiết sản phẩm' isOpen={isOpenDraw} onClose={() => setIsOpenDraw(false)} width="83%">
-                    <Loading isPending={isPendingUpdate}>
+                    <Loading isPending={isPendingUpdate || isPendingUpdated}>
                         <Form
                             name="basic"
                             labelCol={{

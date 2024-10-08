@@ -33,26 +33,42 @@ const createProduct = (newProduct) => {
 const updateProduct = (id, data) => {
     return new Promise(async (resolve, reject) => {
         try {
+            // Kiểm tra xem có sản phẩm nào khác với tên giống không
             const checkProduct = await Product.findOne({
-                _id: id
-            })
-            if (checkProduct === null) {
-                resolve({
+                name: data.name,  // Kiểm tra theo tên sản phẩm mới
+                _id: { $ne: id }  // Đảm bảo ID không phải là ID của sản phẩm đang cập nhật
+            });
+
+            // Nếu tìm thấy sản phẩm khác với tên giống
+            if (checkProduct) {
+                return reject({
+                    status: 'Lỗi',
+                    message: 'Tên này đã được sử dụng! ',
+                });
+            }
+            // Tìm sản phẩm cần cập nhật
+            const productToUpdate = await Product.findById(id);
+            if (!productToUpdate) {
+                return reject({
                     status: 'lỗi',
                     message: 'Không tìm thấy sản phẩm!',
-                })
+                });
             }
-            const updateProduct = await Product.findByIdAndUpdate(id, data, { new: true })
+
+            // Cập nhật sản phẩm
+            const updatedProduct = await Product.findByIdAndUpdate(id, data, { new: true });
+
             resolve({
                 status: 'thành công',
-                message: 'Cập nhập Product thành công ',
-                data: updateProduct,
-            })
+                message: 'Cập nhật sản phẩm thành công ',
+                data: updatedProduct,
+            });
         } catch (e) {
-            reject(e)
+            reject(e);
         }
-    })
-}
+    });
+};
+
 const getDetailsProduct = (id) => {
     return new Promise(async (resolve, reject) => {
         try {
