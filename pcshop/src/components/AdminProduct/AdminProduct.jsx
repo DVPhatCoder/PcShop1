@@ -39,42 +39,46 @@ const AdminProduct = () => {
     })
     const [form] = Form.useForm();
     const mutation = useMutationHooks(
-        (data) => {
-            const {
-                name,
-                image,
-                type,
-                price,
-                rating,
-                description,
-                countInStock
-            } = data;
-            const res = ProductServices.createProduct({
-                name,
-                image,
-                type,
-                price,
-                rating,
-                description,
-                countInStock
-            })
-            return res
+        async (data) => {
+            try {
+                const {
+                    name,
+                    image,
+                    type,
+                    price,
+                    rating,
+                    description,
+                    countInStock
+                } = data;
+                const res = await ProductServices.createProduct({
+                    name,
+                    image,
+                    type,
+                    price,
+                    rating,
+                    description,
+                    countInStock
+                });
+                return res;
+            } catch (error) {
+                console.error("Lỗi khi tạo sản phẩm:", error.response?.data || error.message);
+            }
+
         }
     );
+
     const mutationUpdate = useMutationHooks(
         async (data) => {
             try {
                 const { id, token, ...rests } = data;
                 const res = await ProductServices.updateProduct(id, { ...rests }, token);
-                console.log("Phản hồi API:", res);  // Kiểm tra phản hồi API
                 return res;
             } catch (error) {
                 console.error("Lỗi khi update sản phẩm:", error.response?.data || error.message);
             }
         }
+
     );
-
-
     const handleOnChange = (e) => {
         setStateProduct({
             ...stateProduct,
@@ -126,8 +130,8 @@ const AdminProduct = () => {
     }
     const { data, isPending, isSuccess, isError } = mutation
     const { data: dataUpdated, isSuccess: isSuccessUpdated, isError: isErrorUpdated, isPending: isPendingUpdated } = mutationUpdate
-    console.log('dataUpdated', dataUpdated)
-    const { data: products, isPending: isLoadingProducts } = useQuery({ queryKey: ['products'], queryFn: getAllProduct });
+    const queryProduct = useQuery({ queryKey: ['products'], queryFn: getAllProduct });
+    const { data: products, isPending: isLoadingProducts } = queryProduct
     const renderAction = () => {
         return (
             <div style={{ fontSize: '25px', cursor: 'pointer' }}>
@@ -176,10 +180,10 @@ const AdminProduct = () => {
     })
     useEffect(() => {
         if (isSuccess && data?.status === 'thành công') {
-            Message.success()
+            Message.success('Tạo sản phẩm thành công!')
             handleCancel()
-        } else if (isError) {
-            Message.error()
+        } else if (isError && data?.status === 'Lỗi') {
+            Message.error(data?.message || 'Có lỗi xảy ra khi tạo sản phẩm!')
         }
     }, [isSuccess, isError, data])
     useEffect(() => {
@@ -220,7 +224,11 @@ const AdminProduct = () => {
         form.resetFields()
     };
     const onFinish = () => {
-        mutation.mutate({ stateProduct })
+        mutation.mutate(stateProduct, {
+            onSettled: () => {
+                queryProduct.refetch()
+            }
+        })
     };
 
     const handleOnchangeAvatar = async ({ fileList }) => {
@@ -243,12 +251,16 @@ const AdminProduct = () => {
             image: file.preview
         });
     }
-    console.log("user", user)
+
     const onUpdateProduct = () => {
         mutationUpdate.mutate({
             id: rowSelected,
             token: user?.access_token,
             ...stateProductDetail
+        }, {
+            onSettled: () => {
+                queryProduct.refetch()
+            }
         });
     };
     return (
