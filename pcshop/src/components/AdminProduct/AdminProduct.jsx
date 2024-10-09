@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { WrapperHeader } from './style'
-import { Button, Form, Modal } from 'antd';
+import { Button, Form } from 'antd';
 import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import TableComponent from '../TableComponent/TableComponent';
 import InputComponent from '../InputComponent/InputComponent';
@@ -13,10 +13,12 @@ import * as Message from '../../components/Message/Message'
 import { useQuery } from '@tanstack/react-query';
 import { DrawComponent } from '../DrawComponent/DrawComponent';
 import { useSelector } from 'react-redux';
+import { ModalComponent } from '../ModalComponent/ModalComponent';
 
 const AdminProduct = () => {
     const user = useSelector((state) => state?.user)
     const [rowSelected, setRowSelected] = useState('')
+    const [isModalOpenDelete, setIsModalOpenDelete] = useState(false)
     const [isOpenDraw, setIsOpenDraw] = useState(false)
     const [isPendingUpdate, setIsPendingUpdate] = useState(false)
     const [stateProduct, setStateProduct] = useState({
@@ -79,18 +81,32 @@ const AdminProduct = () => {
         }
 
     );
+
+    const mutationDeleted = useMutationHooks(
+        async (data) => {
+            try {
+                const { id, token } = data;
+                const res = await ProductServices.deleteProduct(id, token);
+                return res;
+            } catch (error) {
+                console.error("Lỗi khi xóa sản phẩm:", error.response?.data || error.message);
+            }
+        }
+    );
     const handleOnChange = (e) => {
         setStateProduct({
             ...stateProduct,
             [e.target.name]: e.target.value
         });
     };
+
     const handleOnChangeDetail = (e) => {
         setStateProductDetail({
             ...stateProductDetail,
             [e.target.name]: e.target.value
         });
     };
+
     const getAllProduct = async () => {
         const res = await ProductServices.getAllProduct()
         return res
@@ -111,6 +127,7 @@ const AdminProduct = () => {
         }
         setIsPendingUpdate(false)
     }
+
     useEffect(() => {
         form.setFieldsValue(stateProductDetail)
     }, [form, stateProductDetail])
@@ -122,20 +139,18 @@ const AdminProduct = () => {
     }, [rowSelected])
 
     const handleDetailsProduct = () => {
-        if (rowSelected) {
-            setIsPendingUpdate(true)
-            fetchGetDetailsProduct()
-        }
         setIsOpenDraw(true)
     }
+
     const { data, isPending, isSuccess, isError } = mutation
     const { data: dataUpdated, isSuccess: isSuccessUpdated, isError: isErrorUpdated, isPending: isPendingUpdated } = mutationUpdate
+    const { data: dataDeleted, isSuccess: isSuccessDeleted, isError: isErrorDeleted, isPending: isPendingDeleted } = mutationDeleted
     const queryProduct = useQuery({ queryKey: ['products'], queryFn: getAllProduct });
     const { data: products, isPending: isLoadingProducts } = queryProduct
     const renderAction = () => {
         return (
             <div style={{ fontSize: '25px', cursor: 'pointer' }}>
-                <DeleteOutlined style={{ color: 'red' }} />
+                <DeleteOutlined style={{ color: 'red' }} onClick={() => setIsModalOpenDelete(true)} />
                 <EditOutlined style={{ padding: '0 10px', color: 'blue' }} onClick={handleDetailsProduct} />
             </div>
         )
@@ -186,15 +201,24 @@ const AdminProduct = () => {
             Message.error(data?.message || 'Có lỗi xảy ra khi tạo sản phẩm!')
         }
     }, [isSuccess, isError, data])
+
     useEffect(() => {
         if (isSuccessUpdated && dataUpdated?.status === 'thành công') {
             Message.success('Cập nhật thành công!');
-            handleCloseDrawer();
+            handleCloseDrawer()
         } else if (isErrorUpdated && dataUpdated?.status === 'Lỗi') {
             Message.error(dataUpdated?.message || 'Có lỗi xảy ra khi cập nhật!');
         }
     }, [isSuccessUpdated, isErrorUpdated, dataUpdated]);
 
+    useEffect(() => {
+        if (isSuccessDeleted && dataDeleted?.status === 'thành công') {
+            Message.success('Xóa thành công!');
+            handleCancelDelete()
+        } else if (isErrorDeleted && dataDeleted?.status === 'Lỗi') {
+            Message.error(dataDeleted?.message || 'Có lỗi xảy ra khi xóa!');
+        }
+    }, [isSuccessDeleted, isErrorDeleted, dataDeleted]);
 
     const handleCloseDrawer = () => {
         setIsOpenDraw(false);
@@ -223,6 +247,16 @@ const AdminProduct = () => {
         })
         form.resetFields()
     };
+    const handleCancelDelete = () => {
+        setIsModalOpenDelete(false)
+    }
+    const handleDeleteProduct = () => {
+        mutationDeleted.mutate({ id: rowSelected, token: user?.access_token }, {
+            onSettled: () => {
+                queryProduct.refetch()
+            }
+        })
+    }
     const onFinish = () => {
         mutation.mutate(stateProduct, {
             onSettled: () => {
@@ -241,6 +275,7 @@ const AdminProduct = () => {
             image: file.preview
         });
     }
+
     const handleOnchangeAvatarDetail = async ({ fileList }) => {
         const file = fileList[0]
         if (!file.url && !file.preview) {
@@ -279,7 +314,7 @@ const AdminProduct = () => {
                         }
                     }} />
                 </div>
-                <Modal title="Tạo sản phẩm" open={isModalOpen} onCancel={handleCancel} footer={null}>
+                <ModalComponent title="Tạo sản phẩm" open={isModalOpen} onCancel={handleCancel} footer={null}>
                     <Loading isPending={isPending}>
                         <Form
                             name="basic"
@@ -397,7 +432,7 @@ const AdminProduct = () => {
                             </Form.Item>
                         </Form>
                     </Loading>
-                </Modal>
+                </ModalComponent>
                 <DrawComponent title='Chi tiết sản phẩm' isOpen={isOpenDraw} onClose={() => setIsOpenDraw(false)} width="83%">
                     <Loading isPending={isPendingUpdate || isPendingUpdated}>
                         <Form
@@ -514,6 +549,11 @@ const AdminProduct = () => {
                         </Form>
                     </Loading>
                 </DrawComponent>
+                <ModalComponent title="Xóa sản phẩm" open={isModalOpenDelete} onCancel={handleCancelDelete} onOk={handleDeleteProduct}>
+                    <Loading isPending={isPendingDeleted}>
+                        <div>Bạn có muốn xóa sản phẩm này không?</div>
+                    </Loading>
+                </ModalComponent>
             </div>
         </div>
     )
