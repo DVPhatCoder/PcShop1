@@ -194,31 +194,34 @@ const AdminProduct = () => {
         }
     })
     useEffect(() => {
-        if (isSuccess && data?.status === 'thành công') {
-            Message.success('Tạo sản phẩm thành công!')
-            handleCancel()
-        } else if (isError && data?.status === 'Lỗi') {
-            Message.error(data?.message || 'Có lỗi xảy ra khi tạo sản phẩm!')
+        if (isSuccess) {
+            Message.success('Tạo sản phẩm thành công!');
+            handleCancel();
+        } else if (isError) {
+            Message.error('Có lỗi xảy ra khi tạo!');
         }
     }, [isSuccess, isError, data])
 
     useEffect(() => {
-        if (isSuccessUpdated && dataUpdated?.status === 'thành công') {
-            Message.success('Cập nhật thành công!');
-            handleCloseDrawer()
-        } else if (isErrorUpdated && dataUpdated?.status === 'Lỗi') {
-            Message.error(dataUpdated?.message || 'Có lỗi xảy ra khi cập nhật!');
+        if (isSuccessUpdated) {
+            Message.success('Update sản phẩm thành công!');
+            handleCloseDrawer();
+        } else if (isErrorUpdated) {
+            Message.error('Có lỗi xảy ra khi update!');
         }
     }, [isSuccessUpdated, isErrorUpdated, dataUpdated]);
 
     useEffect(() => {
-        if (isSuccessDeleted && dataDeleted?.status === 'thành công') {
-            Message.success('Xóa thành công!');
-            handleCancelDelete()
-        } else if (isErrorDeleted && dataDeleted?.status === 'Lỗi') {
-            Message.error(dataDeleted?.message || 'Có lỗi xảy ra khi xóa!');
+        if (isSuccessDeleted) {
+            Message.success('Xóa sản phẩm thành công!');
+            handleCancelDelete();
+        } else if (isErrorDeleted) {
+            Message.error('Có lỗi xảy ra khi xóa!');
         }
     }, [isSuccessDeleted, isErrorDeleted, dataDeleted]);
+
+
+
 
     const handleCloseDrawer = () => {
         setIsOpenDraw(false);

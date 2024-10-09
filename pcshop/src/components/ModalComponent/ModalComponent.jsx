@@ -1,10 +1,10 @@
-import { Modal } from 'antd'
-import React from 'react'
+import { Modal } from 'antd';
+import React from 'react';
 
-export const ModalComponent = ({ title = 'modal', isOpen = false, children, ...rests }) => {
+export const ModalComponent = ({ title = "title", isOpen = false, children, ...rests }) => {
     return (
-        <Modal title="title" open={isOpen} {...rests}>
+        <Modal title={title} open={isOpen} {...rests}>
             {children}
         </Modal>
-    )
+    );
 }
