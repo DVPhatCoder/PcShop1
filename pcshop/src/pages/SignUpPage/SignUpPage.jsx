@@ -27,10 +27,10 @@ const SignUpPage = () => {
     const [confirmPassword, setconfirmPassword] = useState('');
     useEffect(() => {
         if (isSuccess) {
-            Message.success();  // Hiển thị thông báo thành công
+            Message.success('Tạo tài khoản thành công');  // Hiển thị thông báo thành công
             handleNavigateLogin();
         } else if (isError) {
-            Message.error();  // Hiển thị thông báo lỗi
+            Message.error('lỗi tạo tài khoản!');  // Hiển thị thông báo lỗi
         }
     }, [isSuccess, isError]);
     const handleOnchangeEmail = (value) => {

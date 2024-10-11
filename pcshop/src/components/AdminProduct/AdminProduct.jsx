@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { WrapperHeader } from './style'
-import { Button, Form } from 'antd';
-import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { Button, Form, Space } from 'antd';
+import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons';
 import TableComponent from '../TableComponent/TableComponent';
 import InputComponent from '../InputComponent/InputComponent';
 import { getBase64 } from '../../util';
@@ -15,12 +15,25 @@ import { DrawComponent } from '../DrawComponent/DrawComponent';
 import { useSelector } from 'react-redux';
 import { ModalComponent } from '../ModalComponent/ModalComponent';
 
+
+
+
 const AdminProduct = () => {
+    const truncateText = (text, maxLength) => {
+        if (text.length <= maxLength) {
+            return text; // Nếu chuỗi ngắn hơn hoặc bằng độ dài yêu cầu, trả về chuỗi gốc
+        }
+        return text.substring(0, maxLength) + '...'; // Cắt chuỗi và thêm dấu ba chấm
+    };
     const user = useSelector((state) => state?.user)
     const [rowSelected, setRowSelected] = useState('')
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false)
     const [isOpenDraw, setIsOpenDraw] = useState(false)
     const [isPendingUpdate, setIsPendingUpdate] = useState(false)
+    const [searchText, setSearchText] = useState('');
+    const [searchedColumn, setSearchedColumn] = useState('');
+    const searchInput = useRef(null);
+
     const [stateProduct, setStateProduct] = useState({
         name: '',
         type: '',
@@ -76,12 +89,11 @@ const AdminProduct = () => {
                 const res = await ProductServices.updateProduct(id, { ...rests }, token);
                 return res;
             } catch (error) {
-                console.error("Lỗi khi update sản phẩm:", error.response?.data || error.message);
+                console.error("Lỗi khi cập nhập sản phẩm:", error.response?.data || error.message);
             }
         }
 
     );
-
     const mutationDeleted = useMutationHooks(
         async (data) => {
             try {
@@ -139,6 +151,9 @@ const AdminProduct = () => {
     }, [rowSelected])
 
     const handleDetailsProduct = () => {
+        if (rowSelected) {
+            fetchGetDetailsProduct(rowSelected)
+        }
         setIsOpenDraw(true)
     }
 
@@ -147,6 +162,18 @@ const AdminProduct = () => {
     const { data: dataDeleted, isSuccess: isSuccessDeleted, isError: isErrorDeleted, isPending: isPendingDeleted } = mutationDeleted
     const queryProduct = useQuery({ queryKey: ['products'], queryFn: getAllProduct });
     const { data: products, isPending: isLoadingProducts } = queryProduct
+
+    const handleSearch = (selectedKeys, confirm, dataIndex) => {
+        confirm();
+        setSearchText(selectedKeys[0]);
+        setSearchedColumn(dataIndex);
+    };
+    const handleReset = (clearFilters) => {
+        clearFilters();
+        setSearchText('');
+
+    };
+
     const renderAction = () => {
         return (
             <div style={{ fontSize: '25px', cursor: 'pointer' }}>
@@ -155,33 +182,218 @@ const AdminProduct = () => {
             </div>
         )
     }
+
+    const getColumnSearchProps = (dataIndex) => ({
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+            <div
+                style={{
+                    padding: 8,
+                }}
+                onKeyDown={(e) => e.stopPropagation()}
+            >
+                <InputComponent
+                    ref={searchInput}
+                    placeholder={`Search ${dataIndex}`}
+                    value={selectedKeys[0]}
+                    onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                    onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                    style={{
+                        marginBottom: 8,
+                        display: 'block',
+                    }}
+                />
+                <Space>
+                    <Button
+                        type="primary"
+                        onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                        icon={<SearchOutlined />}
+                        size="small"
+                        style={{
+                            width: 90,
+                        }}
+                    >
+                        Search
+                    </Button>
+                    <Button
+                        onClick={() => clearFilters && handleReset(clearFilters)}
+                        size="small"
+                        style={{
+                            width: 90,
+                        }}
+                    >
+                        Reset
+                    </Button>
+                    <Button
+                        type="link"
+                        size="small"
+                        onClick={() => {
+                            close();
+                        }}
+                    >
+                        close
+                    </Button>
+                </Space>
+            </div>
+        ),
+        filterIcon: (filtered) => (
+            <SearchOutlined
+                style={{
+                    color: filtered ? '#1677ff' : undefined,
+                }}
+            />
+        ),
+        onFilter: (value, record) =>
+            record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+        onFilterDropdownOpenChange: (visible) => {
+            if (visible) {
+                setTimeout(() => searchInput.current?.select(), 100);
+            }
+        },
+        // render: (text) =>
+        //   searchedColumn === dataIndex ? (
+        //     <Highlighter
+        //       highlightStyle={{
+        //         backgroundColor: '#ffc069',
+        //         padding: 0,
+        //       }}
+        //       searchWords={[searchText]}
+        //       autoEscape
+        //       textToHighlight={text ? text.toString() : ''}
+        //     />
+        //   ) : (
+        //     text
+        //   ),
+    });
     const columns = [
         {
             title: 'Tên sản phẩm',
             dataIndex: 'name',
-            render: (text) => <a>{text}</a>,
+            sorter: (a, b) => a.name.length - b.name.length,
+            ...getColumnSearchProps('name')
         },
         {
             title: 'Giá sản phẩm',
             dataIndex: 'price',
+            sorter: (a, b) => a.price - b.price,
+            filters: [
+                {
+                    text: 'dưới 5.000.000đ',
+                    value: 'lessThan5m',
+                },
+                {
+                    text: 'Giá từ 5.000.000đ đến 10.000.000đ',
+                    value: 'between5mAnd10m',
+                },
+                {
+                    text: 'Giá từ 10.000.000đ đến 25.000.000đ',
+                    value: 'between10mAnd25m',
+                },
+                {
+                    text: 'Giá từ 25.000.000đ đến 50.000.000đ',
+                    value: 'between25mAnd50m',
+                },
+                {
+                    text: 'Giá trên 50.000.000đ',
+                    value: 'greaterThan50m',
+                },
+            ],
+            onFilter: (value, record) => {
+                switch (value) {
+                    case 'lessThan5m':
+                        return record.price < 5000000;
+                    case 'between5mAnd10m':
+                        return record.price >= 5000000 && record.price <= 10000000;
+                    case 'between10mAnd25m':
+                        return record.price >= 10000000 && record.price <= 25000000;
+                    case 'between25mAnd50m':
+                        return record.price >= 25000000 && record.price <= 50000000;
+                    case 'greaterThan50m':
+                        return record.price > 50000000;
+                    default:
+                        return false; // Nếu không khớp với giá trị nào, trả về false
+                }
+            },
         },
         {
             title: 'Loại',
             dataIndex: 'type',
+            ...getColumnSearchProps('type')
         },
         {
             title: 'Tồn kho',
             dataIndex: 'countInStock',
+            filters: [
+                {
+                    text: 'Nhỏ hơn 50',
+                    value: 'lessThan50',
+                },
+                {
+                    text: 'Lớn hơn 50',
+                    value: 'greaterThan50',
+                },
+            ],
+            onFilter: (value, record) => {
+                switch (value) {
+                    case 'lessThan50':
+                        return record.countInStock < 50; // Kiểm tra nếu countInStock nhỏ hơn 30
+                    case 'greaterThan50':
+                        return record.countInStock > 50; // Kiểm tra nếu countInStock lớn hơn 30
+                    default:
+                        return true; // Mặc định trả về true nếu không khớp
+                }
+            },
         },
 
         {
             title: 'Đánh giá',
             dataIndex: 'rating',
+            sorter: (a, b) => a.rating - b.rating,
+            filters: [
+                {
+                    text: 'đánh giá 1 sao',
+                    value: '1sao',
+                },
+                {
+                    text: 'đánh giá 2 sao',
+                    value: '2sao',
+                },
+                {
+                    text: 'đánh giá 3 sao',
+                    value: '3sao',
+                },
+                {
+                    text: 'đánh giá 4 sao',
+                    value: '4sao',
+                },
+                {
+                    text: 'đánh giá 5 sao',
+                    value: '5sao',
+                },
+
+            ],
+            onFilter: (value, record) => {
+                switch (value) {
+                    case '1sao':
+                        return record.countInStock === 1; // Kiểm tra nếu = 1 sao
+                    case '2sao':
+                        return record.countInStock === 2; // Kiểm tra nếu = 2 sao
+                    case '3sao':
+                        return record.countInStock === 3; // Kiểm tra nếu = 3 sao
+                    case '4sao':
+                        return record.countInStock === 4; // Kiểm tra nếu = 4 sao
+                    case '5sao':
+                        return record.countInStock === 5; // Kiểm tra nếu = 5 sao
+
+                    default:
+                        return true; // Mặc định trả về true nếu không khớp
+                }
+            },
         },
-        // {
-        //     title: 'Mô tả',
-        //     dataIndex: 'description',
-        // },
+        {
+            title: 'Mô tả',
+            dataIndex: 'description',
+            render: (text) => truncateText(text, 30), // Giới hạn 50 ký tự
+        },
         {
             title: 'Action',
             dataIndex: 'action',
@@ -195,19 +407,27 @@ const AdminProduct = () => {
     })
     useEffect(() => {
         if (isSuccess) {
-            Message.success('Tạo sản phẩm thành công!');
-            handleCancel();
+            if (data?.status === 'thành công') {
+                Message.success('Tạo sản phẩm thành công!'); // Thông báo tạo đúng
+                handleCancel(); // Đóng modal sau khi tạo thành công
+            } else {
+                Message.error(data?.message || 'Có lỗi xảy ra khi tạo!'); // Nếu phản hồi không như mong muốn
+            }
         } else if (isError) {
-            Message.error('Có lỗi xảy ra khi tạo!');
+            Message.error('Có lỗi xảy ra khi tạo!'); // Thông báo lỗi
         }
     }, [isSuccess, isError, data])
 
     useEffect(() => {
         if (isSuccessUpdated) {
-            Message.success('Update sản phẩm thành công!');
-            handleCloseDrawer();
+            if (dataUpdated?.status === 'thành công') {
+                Message.success('Cập nhập sản phẩm thành công!'); // Thông báo cập nhập đúng
+                handleCloseDrawer(); // Đóng modal sau khi cập nhập thành công
+            } else {
+                Message.error(dataUpdated?.message || 'Có lỗi xảy ra khi Cập nhập!'); // Nếu phản hồi không như mong muốn
+            }
         } else if (isErrorUpdated) {
-            Message.error('Có lỗi xảy ra khi update!');
+            Message.error('Có lỗi xảy ra khi Cập nhập!'); // Thông báo lỗi
         }
     }, [isSuccessUpdated, isErrorUpdated, dataUpdated]);
 
@@ -219,10 +439,6 @@ const AdminProduct = () => {
             Message.error('Có lỗi xảy ra khi xóa!');
         }
     }, [isSuccessDeleted, isErrorDeleted, dataDeleted]);
-
-
-
-
     const handleCloseDrawer = () => {
         setIsOpenDraw(false);
         setStateProductDetail({
@@ -266,7 +482,7 @@ const AdminProduct = () => {
                 queryProduct.refetch()
             }
         })
-    };
+    }
 
     const handleOnchangeAvatar = async ({ fileList }) => {
         const file = fileList[0]
@@ -317,7 +533,7 @@ const AdminProduct = () => {
                         }
                     }} />
                 </div>
-                <ModalComponent title="Tạo sản phẩm" open={isModalOpen} onCancel={handleCancel} footer={null}>
+                <ModalComponent forceRender title="Tạo sản phẩm" open={isModalOpen} onCancel={handleCancel} footer={null}>
                     <Loading isPending={isPending}>
                         <Form
                             name="basic"
@@ -545,7 +761,7 @@ const AdminProduct = () => {
                                     span: 16,
                                 }}
                             >
-                                <Button type="primary" htmlType="submit">
+                                <Button type="primary" htmlType="apply">
                                     Apply
                                 </Button>
                             </Form.Item>
