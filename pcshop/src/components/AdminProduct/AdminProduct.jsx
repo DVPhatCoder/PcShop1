@@ -768,7 +768,7 @@ const AdminProduct = () => {
                         </Form>
                     </Loading>
                 </DrawComponent>
-                <ModalComponent title="Xóa sản phẩm" open={isModalOpenDelete} onCancel={handleCancelDelete} onOk={handleDeleteProduct}>
+                <ModalComponent forceRender title="Xóa sản phẩm" open={isModalOpenDelete} onCancel={handleCancelDelete} onOk={handleDeleteProduct}>
                     <Loading isPending={isPendingDeleted}>
                         <div>Bạn có muốn xóa sản phẩm này không?</div>
                     </Loading>
