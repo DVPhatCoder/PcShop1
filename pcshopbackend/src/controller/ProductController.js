@@ -57,7 +57,7 @@ const deleteProduct = async (req, res) => {
         if (!productId) {
             return res.status(200).json({
                 status: 'Lỗi',
-                message: 'Người dùng không tồn tại',
+                message: 'Sản phẩm không tồn tại',
             })
         }
         const response = await ProductServices.deleteProduct(productId)
@@ -79,10 +79,28 @@ const getAllProdcut = async (req, res) => {
         })
     }
 }
+const deleteMany = async (req, res) => {
+    try {
+        const ids = req.body.ids
+        if (!ids) {
+            return res.status(200).json({
+                status: 'Lỗi',
+                message: 'Danh sách ID không được cung cấp hoặc không hợp lệ',
+            })
+        }
+        const response = await ProductServices.deleteManyProduct(ids)
+        return res.status(200).json(response)
+    } catch (e) {
+        return res.status(404).json({
+            message: e
+        })
+    }
+}
 module.exports = {
     createProduct,
     updateProduct,
     getDetailsProduct,
     deleteProduct,
-    getAllProdcut
+    getAllProdcut,
+    deleteMany
 } 

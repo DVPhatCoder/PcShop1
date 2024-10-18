@@ -161,10 +161,26 @@ const getAllProdcut = (limit, page, sort, filter) => {
         }
     })
 }
+const deleteManyProduct = (ids) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await Product.deleteMany({
+                _id: ids
+            })
+            resolve({
+                status: 'Thành công',
+                message: 'Xóa nhiều sản phẩm thành công!',
+            })
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
 module.exports = {
     createProduct,
     updateProduct,
     getDetailsProduct,
     deleteProduct,
-    getAllProdcut
+    getAllProdcut,
+    deleteManyProduct
 }

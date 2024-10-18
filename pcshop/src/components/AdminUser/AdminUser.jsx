@@ -54,10 +54,28 @@ const AdminUser = () => {
                 const res = await UserServices.deleteUser(id, token);
                 return res;
             } catch (error) {
-                console.error("Lỗi khi xóa sản phẩm:", error.response?.data || error.message);
+                console.error("Lỗi khi xóa người dùng:", error.response?.data || error.message);
             }
         }
     );
+    const mutationDeletedMany = useMutationHooks(
+        async (data) => {
+            try {
+                const { token, ...ids } = data;
+                const res = await UserServices.deleteManyUser(ids, token);
+                return res;
+            } catch (error) {
+                console.error("Lỗi khi xóa người dùng:", error.response?.data || error.message);
+            }
+        }
+    );
+    const handleDeleteManyUser = (ids) => {
+        mutationDeletedMany.mutate({ ids: ids, token: user?.access_token }, {
+            onSettled: () => {
+                queryUser.refetch()
+            }
+        })
+    }
     const handleOnChangeDetail = (e) => {
         setStateUserDetail({
             ...stateUserDetail,
@@ -104,6 +122,7 @@ const AdminUser = () => {
 
     const { data: dataUpdated, isSuccess: isSuccessUpdated, isError: isErrorUpdated, isPending: isPendingUpdated } = mutationUpdate
     const { data: dataDeleted, isSuccess: isSuccessDeleted, isError: isErrorDeleted, isPending: isPendingDeleted } = mutationDeleted
+    const { data: dataDeletedMany, isSuccess: isSuccessDeletedMany, isError: isErrorDeletedMany, isPending: isPendingDeletedMany } = mutationDeletedMany
     const queryUser = useQuery({ queryKey: ['users'], queryFn: getAllUser });
     const { data: users, isPending: isLoadingUsers } = queryUser
 
@@ -212,7 +231,7 @@ const AdminUser = () => {
         {
             title: 'Tên người dùng',
             dataIndex: 'name',
-            sorter: (a, b) => a.name.length - b.name.length,
+            sorter: (a, b) => a.name.localeCompare(b.name, 'vi'),
             ...getColumnSearchProps('name')
         },
         {
@@ -244,6 +263,7 @@ const AdminUser = () => {
         {
             title: 'Địa chỉ',
             dataIndex: 'address',
+            sorter: (a, b) => a.address.localeCompare(b.address, 'vi'),
             ...getColumnSearchProps('address')
         },
         {
@@ -290,6 +310,14 @@ const AdminUser = () => {
             Message.error('Có lỗi xảy ra khi xóa!');
         }
     }, [isSuccessDeleted, isErrorDeleted, dataDeleted]);
+    useEffect(() => {
+        if (isSuccessDeletedMany) {
+            Message.success('Xóa nhiều sản phẩm thành công!');
+            handleCancelDelete();
+        } else if (isErrorDeletedMany) {
+            Message.error('Có lỗi xảy ra khi xóa!');
+        }
+    }, [dataDeletedMany, isSuccessDeletedMany, isErrorDeletedMany])
     const handleCloseDrawer = () => {
         setIsOpenDraw(false);
         setStateUserDetail({
@@ -338,7 +366,7 @@ const AdminUser = () => {
         <div>
             <WrapperHeader>Quản lý người dùng</WrapperHeader>
             <div style={{ margin: '15px' }}>
-                <TableComponent columns={columns} isPending={isLoadingUsers} data={dataTable} onRow={(record, rowIndex) => {
+                <TableComponent handleDeleteMany={handleDeleteManyUser} columns={columns} isPending={isLoadingUsers} data={dataTable} onRow={(record, rowIndex) => {
                     return {
                         onClick: (event) => {
                             setRowSelected(record._id)

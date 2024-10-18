@@ -105,6 +105,17 @@ const AdminProduct = () => {
             }
         }
     );
+    const mutationDeletedMany = useMutationHooks(
+        async (data) => {
+            try {
+                const { token, ...ids } = data;
+                const res = await ProductServices.deleteManyProduct(ids, token);
+                return res;
+            } catch (error) {
+                console.error("Lỗi khi xóa sản phẩm:", error.response?.data || error.message);
+            }
+        }
+    );
     const handleOnChange = (e) => {
         setStateProduct({
             ...stateProduct,
@@ -156,10 +167,17 @@ const AdminProduct = () => {
         }
         setIsOpenDraw(true)
     }
-
+    const handleDeleteManyProduct = (ids) => {
+        mutationDeletedMany.mutate({ ids: ids, token: user?.access_token }, {
+            onSettled: () => {
+                queryProduct.refetch()
+            }
+        })
+    }
     const { data, isPending, isSuccess, isError } = mutation
     const { data: dataUpdated, isSuccess: isSuccessUpdated, isError: isErrorUpdated, isPending: isPendingUpdated } = mutationUpdate
     const { data: dataDeleted, isSuccess: isSuccessDeleted, isError: isErrorDeleted, isPending: isPendingDeleted } = mutationDeleted
+    const { data: dataDeletedMany, isSuccess: isSuccessDeletedMany, isError: isErrorDeletedMany, isPending: isPendingDeletedMany } = mutationDeletedMany
     const queryProduct = useQuery({ queryKey: ['products'], queryFn: getAllProduct });
     const { data: products, isPending: isLoadingProducts } = queryProduct
 
@@ -268,7 +286,7 @@ const AdminProduct = () => {
         {
             title: 'Tên sản phẩm',
             dataIndex: 'name',
-            sorter: (a, b) => a.name.length - b.name.length,
+            sorter: (a, b) => a.name.localeCompare(b.name, 'vi'),
             ...getColumnSearchProps('name')
         },
         {
@@ -317,6 +335,7 @@ const AdminProduct = () => {
         {
             title: 'Loại',
             dataIndex: 'type',
+            sorter: (a, b) => a.type.localeCompare(b.type, 'vi'),
             ...getColumnSearchProps('type')
         },
         {
@@ -335,9 +354,9 @@ const AdminProduct = () => {
             onFilter: (value, record) => {
                 switch (value) {
                     case 'lessThan50':
-                        return record.countInStock < 50; // Kiểm tra nếu countInStock nhỏ hơn 30
+                        return record.countInStock < 50; // Kiểm tra nếu countInStock nhỏ hơn 50
                     case 'greaterThan50':
-                        return record.countInStock > 50; // Kiểm tra nếu countInStock lớn hơn 30
+                        return record.countInStock > 50; // Kiểm tra nếu countInStock lớn hơn 50
                     default:
                         return true; // Mặc định trả về true nếu không khớp
                 }
@@ -392,7 +411,8 @@ const AdminProduct = () => {
         {
             title: 'Mô tả',
             dataIndex: 'description',
-            render: (text) => truncateText(text, 30), // Giới hạn 50 ký tự
+            sorter: (a, b) => a.type.localeCompare(b.type, 'vi'),
+            render: (text) => truncateText(text, 30), // Giới hạn 30 ký tự
         },
         {
             title: 'Action',
@@ -439,6 +459,15 @@ const AdminProduct = () => {
             Message.error('Có lỗi xảy ra khi xóa!');
         }
     }, [isSuccessDeleted, isErrorDeleted, dataDeleted]);
+
+    useEffect(() => {
+        if (isSuccessDeletedMany) {
+            Message.success('Xóa nhiều sản phẩm thành công!');
+            handleCancelDelete();
+        } else if (isErrorDeletedMany) {
+            Message.error('Có lỗi xảy ra khi xóa!');
+        }
+    }, [dataDeletedMany, isSuccessDeletedMany, isErrorDeletedMany])
     const handleCloseDrawer = () => {
         setIsOpenDraw(false);
         setStateProductDetail({
@@ -476,6 +505,7 @@ const AdminProduct = () => {
             }
         })
     }
+
     const onFinish = () => {
         mutation.mutate(stateProduct, {
             onSettled: () => {
@@ -525,7 +555,7 @@ const AdminProduct = () => {
                     <Button style={{ height: '150px', width: '150px', borderRadius: '6px', borderStyle: 'dashed' }} onClick={() => setIsModalOpen(true)}><PlusOutlined style={{ fontSize: '50px' }} /> </Button>
                 </div>
                 <div style={{ margin: '15px' }}>
-                    <TableComponent columns={columns} isPending={isLoadingProducts} data={dataTable} onRow={(record, rowIndex) => {
+                    <TableComponent handleDeleteMany={handleDeleteManyProduct} columns={columns} isPending={isLoadingProducts} data={dataTable} onRow={(record, rowIndex) => {
                         return {
                             onClick: (event) => {
                                 setRowSelected(record._id)

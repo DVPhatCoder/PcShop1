@@ -1,35 +1,49 @@
-import { Table } from 'antd'
+import { Table } from 'antd';
 import Loading from '../LoadingComponent/Loading';
-
+import { useState } from 'react';
 
 const TableComponent = (props) => {
-    const { selectionType = 'checkbox', data = [], isPending = false, columns = [] } = props
+    const { selectionType = 'checkbox', data = [], isPending = false, columns = [], handleDeleteMany } = props;
+    const [rowSelectedKey, setRowSelectedKey] = useState([]);
+
     const rowSelection = {
-        onChange: (selectedRowKeys, selectedRows) => {
-            console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+        onChange: (selectedRowKeys) => {
+            setRowSelectedKey(selectedRowKeys); // Cập nhật selected keys
+            console.log(`selectedRowKeys: ${selectedRowKeys}`);
         },
-        getCheckboxProps: (record) => ({
-            disabled: record.name === 'Disabled User',
-            // Column configuration not to be checked
-            name: record.name,
-        }),
     };
+
+    const handleDeleteAll = () => {
+        handleDeleteMany(rowSelectedKey)
+
+    };
+
     return (
         <Loading isPending={isPending}>
-            <div>
-                <Table
-                    rowSelection={{
-                        type: selectionType,
-                        ...rowSelection,
-                    }}
-                    columns={columns}
-                    dataSource={data}
-                    {...props}
-                />
-            </div>
+            {rowSelectedKey.length > 0 && (
+                <div style={{
+                    background: '#1d1ddd',
+                    color: '#fff',
+                    fontWeight: 'bold',
+                    padding: '10px',
+                    cursor: 'pointer',
+                }}
+                    onClick={handleDeleteAll}
+                >
+                    Xóa tất cả
+                </div>
+            )}
+            <Table
+                rowSelection={{
+                    type: selectionType,
+                    ...rowSelection,
+                }}
+                columns={columns}
+                dataSource={data}
+                {...props}
+            />
         </Loading>
+    );
+};
 
-    )
-}
-
-export default TableComponent
+export default TableComponent;
