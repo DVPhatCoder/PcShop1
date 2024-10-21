@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "antd-table-saveas-excel": "^2.2.1",
+    "dayjs": "^1.11.13",
+    "react-html-table-to-excel": "^2.0.0"
+  }
+}

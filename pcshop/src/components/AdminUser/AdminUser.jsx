@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { WrapperHeader, WrapperUploadFile } from './style'
 import { Button, Form, Space } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
 import TableComponent from '../TableComponent/TableComponent';
 import { ModalComponent } from '../ModalComponent/ModalComponent';
 import Loading from '../LoadingComponent/Loading';
@@ -14,6 +13,7 @@ import { useMutationHooks } from '../../hooks/useMutationHook';
 import * as UserServices from '../../services/UserServices'
 import { useQuery } from '@tanstack/react-query';
 import { DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 
 
 const AdminUser = () => {
@@ -31,7 +31,7 @@ const AdminUser = () => {
         email: '',
         phone: '',
         address: '',
-        image: '',
+        avatar: '',
         isAdmin: false,
     })
     const [form] = Form.useForm();
@@ -97,7 +97,7 @@ const AdminUser = () => {
                 phone: res?.data?.phone,
                 isAdmin: res?.data?.isAdmin,
                 address: res?.data?.address,
-                image: res?.data?.image,
+                avatar: res?.data?.avatar,
             })
         }
         setIsPendingUpdate(false)
@@ -269,14 +269,16 @@ const AdminUser = () => {
         {
             title: 'ngày tạo',
             dataIndex: 'createdAt',
-            sorter: (a, b) => a.createdAt.length - b.createdAt.length,
+            sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt), // Sắp xếp ngày
+            render: (text) => dayjs(text).format('DD/MM/YYYY'), // Định dạng ngày hiển thị
             ...getColumnSearchProps('createdAt')
         },
         {
             title: 'ngày cập nhập',
             dataIndex: 'updatedAt',
-            sorter: (a, b) => a.updatedAt.length - b.updatedAt.length,
-            ...getColumnSearchProps('createdAt')
+            sorter: (a, b) => new Date(a.updatedAt) - new Date(b.updatedAt), // Sắp xếp ngày
+            render: (text) => dayjs(text).format('DD/MM/YYYY'), // Định dạng ngày hiển thị
+            ...getColumnSearchProps('updatedAt')
         },
         {
             title: 'Action',
@@ -312,7 +314,7 @@ const AdminUser = () => {
     }, [isSuccessDeleted, isErrorDeleted, dataDeleted]);
     useEffect(() => {
         if (isSuccessDeletedMany) {
-            Message.success('Xóa nhiều sản phẩm thành công!');
+            Message.success('Xóa nhiều người dùng thành công!');
             handleCancelDelete();
         } else if (isErrorDeletedMany) {
             Message.error('Có lỗi xảy ra khi xóa!');
@@ -346,7 +348,7 @@ const AdminUser = () => {
         }
         setStateUserDetail({
             ...stateUserDetail,
-            image: file.preview
+            avatar: file.preview
         });
     }
 
@@ -445,12 +447,12 @@ const AdminUser = () => {
                         </Form.Item>
                         <Form.Item
                             label="Ảnh người dùng"
-                            name="image"
+                            name="avatar"
                             rules={[{ required: true, message: 'Vui lòng tải lên ảnh người dùng!' }]}>
                             <WrapperUploadFile onChange={handleOnchangeUserDetail} maxCount={1}>
                                 <Button>Upload</Button>
-                                {stateUserDetail?.image && (
-                                    <img src={stateUserDetail?.image} style={{
+                                {stateUserDetail?.avatar && (
+                                    <img src={stateUserDetail?.avatar} style={{
                                         height: '100px',
                                         width: '100px',
                                         objectFit: 'cover',

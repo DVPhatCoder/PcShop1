@@ -57,9 +57,9 @@ const ProfilePage = () => {
     const handleUpdate = () => {
         mutation.mutate({ id: user?.id, email, name, phone, address, avatar, access_token: user?.access_token })
         if (isSuccess) {
-            Message.success()
+            Message.success('Cập nhập thành công')
         } else if (isError) {
-            Message.error()
+            Message.error('Lỗi cập nhập')
         }
     }
 

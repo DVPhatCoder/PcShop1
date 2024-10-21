@@ -1,9 +1,10 @@
-import { Table } from 'antd';
+import { Button, Table } from 'antd';
 import Loading from '../LoadingComponent/Loading';
 import { useState } from 'react';
+import { Excel } from "antd-table-saveas-excel";
 
 const TableComponent = (props) => {
-    const { selectionType = 'checkbox', data = [], isPending = false, columns = [], handleDeleteMany } = props;
+    const { selectionType = 'checkbox', data: dataSource = [], isPending = false, columns = [], handleDeleteMany } = props;
     const [rowSelectedKey, setRowSelectedKey] = useState([]);
 
     const rowSelection = {
@@ -16,6 +17,18 @@ const TableComponent = (props) => {
     const handleDeleteAll = () => {
         handleDeleteMany(rowSelectedKey)
 
+    };
+    const exportExcel = () => {
+        // Loại bỏ cột action
+        const filteredColumns = columns.filter(column => column.dataIndex !== 'action');
+        const excel = new Excel();
+        excel
+            .addSheet("test")
+            .addColumns(filteredColumns) // Sử dụng cột đã được lọc
+            .addDataSource(dataSource, {
+                str2Percent: true
+            })
+            .saveAs("Excel.xlsx");
     };
 
     return (
@@ -33,13 +46,16 @@ const TableComponent = (props) => {
                     Xóa tất cả
                 </div>
             )}
+            <Button onClick={exportExcel}>Xuất ra File Excel</Button>
             <Table
+                id='table-xls'
+                columns={columns.filter(column => column.dataIndex !== 'action')}
                 rowSelection={{
                     type: selectionType,
                     ...rowSelection,
                 }}
                 columns={columns}
-                dataSource={data}
+                dataSource={dataSource}
                 {...props}
             />
         </Loading>
