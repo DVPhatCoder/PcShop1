@@ -16,7 +16,9 @@ export const WrapperButtonMore = styled(ButtonComponent)`
         }
     }
     text-align: center;
-`;
+    cursor:${(props) => props.disabled ? 'not-allowed' : 'pointer'}
+    
+`
 export const WrapperProducts = styled.div`
     display: flex;
     gap: 14px;

@@ -1,14 +1,14 @@
 import axios from "axios"
 import { axiosJWT } from "./UserServices"
 
-export const getAllProduct = async (search) => {
+export const getAllProduct = async (search, limit) => {
     let res = {}
-    if (search.length > 0) {
+    if (search?.length > 0) {
         // Gọi API với tham số tìm kiếm nếu search không rỗng
-        res = await axios.get(`${process.env.REACT_APP_API_URL}/product/getAllProduct?filter=name&filter=${search}`);
+        res = await axios.get(`${process.env.REACT_APP_API_URL}/product/getAllProduct?filter=name&filter=${search}&limit=${limit}`);
     } else {
         // Gọi API lấy tất cả sản phẩm nếu search rỗng hoặc không tồn tại
-        res = await axios.get(`${process.env.REACT_APP_API_URL}/product/getAllProduct`);
+        res = await axios.get(`${process.env.REACT_APP_API_URL}/product/getAllProduct?limit=${limit}`);
     }
     return res.data; // Trả về dữ liệu từ phản hồi
 }

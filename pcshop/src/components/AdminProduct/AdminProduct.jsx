@@ -393,15 +393,15 @@ const AdminProduct = () => {
             onFilter: (value, record) => {
                 switch (value) {
                     case '1sao':
-                        return record.countInStock === 1; // Kiểm tra nếu = 1 sao
+                        return record.rating === 1; // Kiểm tra nếu = 1 sao
                     case '2sao':
-                        return record.countInStock === 2; // Kiểm tra nếu = 2 sao
+                        return record.rating === 2; // Kiểm tra nếu = 2 sao
                     case '3sao':
-                        return record.countInStock === 3; // Kiểm tra nếu = 3 sao
+                        return record.rating === 3; // Kiểm tra nếu = 3 sao
                     case '4sao':
-                        return record.countInStock === 4; // Kiểm tra nếu = 4 sao
+                        return record.rating === 4; // Kiểm tra nếu = 4 sao
                     case '5sao':
-                        return record.countInStock === 5; // Kiểm tra nếu = 5 sao
+                        return record.rating === 5; // Kiểm tra nếu = 5 sao
 
                     default:
                         return true; // Mặc định trả về true nếu không khớp
