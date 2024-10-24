@@ -68,12 +68,12 @@ const HomePage = () => {
                     </WrapperProducts>
                     <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
                         <WrapperButtonMore
-                            textButton="Xem Thêm" type="outline"
+                            textButton={isPreviousData ? 'Tải thêm' : "Xem Thêm"} type="outline"
                             styleButton={{
                                 border: '1px solid rgb(11, 116, 229)', borderRadius: '4px',
                                 color: `${products?.total === products?.data?.length ? '#ccc' : 'rgb(11, 116, 229)'}`, with: '240px', height: '38px',
                             }}
-                            disabled={products?.total === products?.data?.length}
+                            disabled={products?.total === products?.data?.length || products?.totalPage === 1}
                             styleTextButton={{ fontWeight: 600, color: products?.total === products?.data?.length && '#fff' }}
                             onClick={() => setLimit((prev) => prev + 6)}
                         />
