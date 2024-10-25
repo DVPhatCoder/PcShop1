@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
 import TypeProduct from '../../components/TypeProduct/TypeProduct'
 import { WrapperButtonMore, WrapperProducts, WrapperTypeProduct } from './style'
 import SliderComponent from '../../components/SliderComponent/SliderComponent'
@@ -19,7 +19,6 @@ const HomePage = () => {
     const searchDebounce = useDebounce(searchProduct, 500)
     const arr = ['Lenovo', 'Hp', 'Lap Top']
     const fetchProductAll = async (context) => {
-        console.log('context', context)
         const limit = context?.queryKey && context?.queryKey[1]
         const search = context?.queryKey && context?.queryKey[2]
         const res = await ProductServices.getAllProduct(search, limit)
@@ -62,6 +61,7 @@ const HomePage = () => {
                                     type={products.type}
                                     discount={products.Number}
                                     selled={products.Number}
+                                    id={products._id}
                                 />
                             )
                         })}
