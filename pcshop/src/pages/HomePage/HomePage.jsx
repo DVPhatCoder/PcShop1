@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import TypeProduct from '../../components/TypeProduct/TypeProduct'
 import { WrapperButtonMore, WrapperProducts, WrapperTypeProduct } from './style'
 import SliderComponent from '../../components/SliderComponent/SliderComponent'
@@ -17,14 +17,24 @@ const HomePage = () => {
     const [limit, setLimit] = useState(12)
     const searchProduct = useSelector((state) => state?.product?.search)
     const searchDebounce = useDebounce(searchProduct, 500)
-    const arr = ['Lenovo', 'Hp', 'Lap Top']
+    const [typeProducts, setTypeProducts] = useState([])
     const fetchProductAll = async (context) => {
         const limit = context?.queryKey && context?.queryKey[1]
         const search = context?.queryKey && context?.queryKey[2]
         const res = await ProductServices.getAllProduct(search, limit)
         return res
     }
+    const fetchAllTypeProduct = async () => {
+        const res = await ProductServices.getAllTypeProduct()
+        if (res?.status === 'thành công') {
+            setTypeProducts(res?.data)
+        }
+    }
 
+    useEffect(() => {
+        fetchAllTypeProduct()
+
+    }, [])
     const { data: products, isLoading, isPreviousData, } = useQuery({
         queryKey: ['products', limit, searchDebounce],   // Sử dụng mảng cho khóa query
         queryFn: fetchProductAll, // Hàm để fetch dữ liệu
@@ -37,7 +47,7 @@ const HomePage = () => {
         <Loading isPending={isLoading}>
             <div style={{ width: '1270px', margin: '0 auto' }}>
                 <WrapperTypeProduct>
-                    {arr.map((item) => {
+                    {typeProducts.map((item) => {
                         return (
                             <TypeProduct name={item} key={item} />
                         )

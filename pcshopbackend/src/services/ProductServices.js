@@ -1,4 +1,5 @@
 const Product = require("../models/ProductModel.js")
+
 const createProduct = (newProduct) => {
     return new Promise(async (resolve, reject) => {
         const { name, image, type, price, countInStock, rating, description } = newProduct
@@ -30,6 +31,7 @@ const createProduct = (newProduct) => {
         }
     });
 }
+
 const updateProduct = (id, data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -67,8 +69,7 @@ const updateProduct = (id, data) => {
             });
         }
     });
-};
-
+}
 
 const getDetailsProduct = (id) => {
     return new Promise(async (resolve, reject) => {
@@ -92,6 +93,7 @@ const getDetailsProduct = (id) => {
         }
     })
 }
+
 const deleteProduct = (id) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -114,6 +116,7 @@ const deleteProduct = (id) => {
         }
     })
 }
+
 const getAllProdcut = (limit, page, sort, filter) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -161,6 +164,7 @@ const getAllProdcut = (limit, page, sort, filter) => {
         }
     })
 }
+
 const deleteManyProduct = (ids) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -176,11 +180,27 @@ const deleteManyProduct = (ids) => {
         }
     })
 }
+const getAllType = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const allType = await Product.distinct('type')
+            resolve({
+                message: "Lấy Type từ database thành công",
+                status: "thành công",
+                data: allType,
+            })
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
 module.exports = {
     createProduct,
     updateProduct,
     getDetailsProduct,
     deleteProduct,
     getAllProdcut,
-    deleteManyProduct
+    deleteManyProduct,
+    getAllType
 }

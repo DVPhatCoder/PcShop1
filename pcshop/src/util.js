@@ -14,3 +14,19 @@ export const getBase64 = (file) =>
         reader.onload = () => resolve(reader.result);
         reader.onerror = (error) => reject(error);
     })
+export const renderOptions = (arr) => {
+    let results = []; // Đổi từ const sang let
+    if (arr) {
+        results = arr?.map((opt) => {
+            return {
+                value: opt,
+                label: opt
+            };
+        });
+    }
+    results.push({
+        label: 'Thêm Type',
+        value: 'add_type',
+    });
+    return results;
+}

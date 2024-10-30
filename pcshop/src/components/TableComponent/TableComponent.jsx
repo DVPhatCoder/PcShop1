@@ -9,24 +9,24 @@ const TableComponent = (props) => {
 
     const rowSelection = {
         onChange: (selectedRowKeys) => {
-            setRowSelectedKey(selectedRowKeys); // Cập nhật selected keys
+            setRowSelectedKey(selectedRowKeys);
             console.log(`selectedRowKeys: ${selectedRowKeys}`);
         },
     };
 
     const handleDeleteAll = () => {
-        handleDeleteMany(rowSelectedKey)
-
+        handleDeleteMany(rowSelectedKey);
     };
+
     const exportExcel = () => {
-        // Loại bỏ cột action
+        // Loại bỏ cột có dataIndex là 'action' trước khi xuất Excel
         const filteredColumns = columns.filter(column => column.dataIndex !== 'action');
         const excel = new Excel();
         excel
-            .addSheet("test")
-            .addColumns(filteredColumns) // Sử dụng cột đã được lọc
+            .addSheet("Sheet1")
+            .addColumns(filteredColumns)
             .addDataSource(dataSource, {
-                str2Percent: true
+                str2Percent: true,
             })
             .saveAs("Excel.xlsx");
     };
@@ -34,13 +34,14 @@ const TableComponent = (props) => {
     return (
         <Loading isPending={isPending}>
             {rowSelectedKey.length > 0 && (
-                <div style={{
-                    background: '#1d1ddd',
-                    color: '#fff',
-                    fontWeight: 'bold',
-                    padding: '10px',
-                    cursor: 'pointer',
-                }}
+                <div
+                    style={{
+                        background: '#1d1ddd',
+                        color: '#fff',
+                        fontWeight: 'bold',
+                        padding: '10px',
+                        cursor: 'pointer',
+                    }}
                     onClick={handleDeleteAll}
                 >
                     Xóa tất cả
@@ -48,13 +49,11 @@ const TableComponent = (props) => {
             )}
             <Button onClick={exportExcel}>Xuất ra File Excel</Button>
             <Table
-                id='table-xls'
                 columns={columns.filter(column => column.dataIndex !== 'action')}
                 rowSelection={{
                     type: selectionType,
                     ...rowSelection,
                 }}
-                columns={columns}
                 dataSource={dataSource}
                 {...props}
             />
