@@ -41,8 +41,8 @@ export const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false }
             setUserAvatar(user?.avatar);
         } else {
             // Nếu không có token, reset thông tin người dùng
-            setUserName('');
-            setUserAvatar('');
+            setUserName(' ');
+            setUserAvatar(' ');
             dispatch(resetUser());  // Đảm bảo Redux state cũng được reset
         }
         setLoading(false);
@@ -111,7 +111,7 @@ export const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false }
                         </WrapperHeaderAccount>
                     </Loading>
                     {!isHiddenCart && (
-                        <div>
+                        <div onClick={() => navigate('/order')} style={{ cursor: 'pointer' }}>
                             <Badge count={4} size="small">
                                 <ShoppingCartOutlined style={{ fontSize: '30px', color: '#fff' }} />
                             </Badge>

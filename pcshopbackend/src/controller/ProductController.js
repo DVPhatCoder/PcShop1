@@ -71,18 +71,13 @@ const deleteProduct = async (req, res) => {
 }
 const getAllProdcut = async (req, res) => {
     try {
-        let { limit, page, sort, filter } = req.query;
-
-        // Kiểm tra nếu không có limit thì gán bằng null để lấy hết sản phẩm
-        limit = limit ? Number(limit) : null;
-        page = page ? Number(page) : 0;
-
-        const response = await ProductServices.getAllProdcut(limit, page, sort, filter);
-        return res.status(200).json(response);
+        const { limit, page, sort, filter } = req.query
+        const response = await ProductServices.getAllProdcut(Number(limit) || null, Number(page) || 0, sort, filter)
+        return res.status(200).json(response)
     } catch (e) {
         return res.status(404).json({
-            message: e.message
-        });
+            message: e
+        })
     }
 }
 

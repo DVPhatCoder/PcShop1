@@ -58,20 +58,20 @@ const HomePage = () => {
                 <div id="container" style={{ margin: '0 auto', height: '1000px', width: '1270px' }} >
                     <SliderComponent arrImages={[slider1, slider2, slider3]} />
                     <WrapperProducts>
-                        {products?.data?.map((products) => {
+                        {products?.data?.map((product) => {
                             return (
                                 <CardComponent
-                                    key={products._id}
-                                    countInStock={products.countInStock}
-                                    description={products.description}
-                                    image={products.image}
-                                    name={products.name}
-                                    price={products.price}
-                                    rating={products.rating}
-                                    type={products.type}
-                                    discount={products.Number}
-                                    selled={products.Number}
-                                    id={products._id}
+                                    key={product._id}
+                                    countInStock={product.countInStock}
+                                    description={product.description}
+                                    image={product.image}
+                                    name={product.name}
+                                    price={product.price}
+                                    rating={product.rating}
+                                    type={product.type}
+                                    discount={product.Number}
+                                    selled={product.Number}
+                                    id={product._id}
                                 />
                             )
                         })}

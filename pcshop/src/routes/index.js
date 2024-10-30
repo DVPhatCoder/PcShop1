@@ -25,7 +25,7 @@ export const routes = [
         isShowHeader: true
     },
     {
-        path: '/type',
+        path: '/product/:type',
         page: TyperProductPage,
         isShowHeader: true
     },

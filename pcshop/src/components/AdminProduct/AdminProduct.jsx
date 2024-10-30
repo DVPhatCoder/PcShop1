@@ -25,7 +25,6 @@ const AdminProduct = () => {
         }
         return text.substring(0, maxLength) + '...'; // Cắt chuỗi và thêm dấu ba chấm
     };
-    const [typeSelect, setTypeSelect] = useState('')
     const user = useSelector((state) => state?.user)
     const [rowSelected, setRowSelected] = useState('')
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false)

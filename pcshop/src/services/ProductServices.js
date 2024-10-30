@@ -10,9 +10,14 @@ export const getAllProduct = async (search, limit) => {
         // Gọi API lấy tất cả sản phẩm nếu search rỗng hoặc không tồn tại
         res = await axios.get(`${process.env.REACT_APP_API_URL}/product/getAllProduct?limit=${limit}`);
     }
-    return res.data; // Trả về dữ liệu từ phản hồi
+    return res.data // Trả về dữ liệu từ phản hồi
 }
-
+export const getAllProductType = async (type) => {
+    if (type) {
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/product/getAllProduct?filter=type&filter=${type}`);
+        return res
+    }
+}
 
 export const createProduct = async (data) => {
     const res = await axios.post(`${process.env.REACT_APP_API_URL}/product/create`, data)
