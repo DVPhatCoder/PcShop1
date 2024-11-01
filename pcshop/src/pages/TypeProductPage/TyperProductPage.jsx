@@ -1,47 +1,70 @@
-import React, { useEffect, useState } from 'react'
-import NavBarComponent from '../../components/NavbarComponent/NavBarComponent'
-import CardComponent from '../../components/CardComponent/CardComponent'
-import { Row, Pagination, Col } from 'antd'
-import { WrapperNavbar, WrapperProducts } from './style'
-import { useLocation } from 'react-router-dom'
-import * as ProductServices from '../../services/ProductServices'
-import Loading from '../../components/LoadingComponent/Loading'
+import React, { useEffect, useState } from 'react';
+import NavBarComponent from '../../components/NavbarComponent/NavBarComponent';
+import CardComponent from '../../components/CardComponent/CardComponent';
+import { Row, Pagination, Col } from 'antd';
+import { WrapperNavbar, WrapperProducts } from './style';
+import { useLocation } from 'react-router-dom';
+import * as ProductServices from '../../services/ProductServices';
+import Loading from '../../components/LoadingComponent/Loading';
+import { useSelector } from 'react-redux';
+import { useDebounce } from '../../hooks/useDebounce';
 
 const TyperProductPage = () => {
-    const { state } = useLocation()
-    const [products, setProducts] = useState([])
-    const [loading, setloading] = useState(false)
-    const fetchProductType = async (type) => {
-        setloading(true)
-        const res = await ProductServices.getAllProductType(type)
+    const searchProduct = useSelector((state) => state?.product?.search);
+    const searchDebounce = useDebounce(searchProduct, 500);
+    const [panigate, setPanigate] = useState({
+        page: 0,
+        limit: 10,
+        total: 1,
+    });
+    const { state } = useLocation();
+    const [products, setProducts] = useState([]);
+    const [loading, setloading] = useState(false);
+
+    const fetchProductType = async (type, page, limit) => {
+        setloading(true);
+        const res = await ProductServices.getAllProductType(type, page, limit);
         if (res?.data) {
-            setloading(false)
-            setProducts(res?.data)
-
+            setloading(false);
+            setProducts(res?.data);
+            setPanigate({ ...panigate, total: res?.totalPage });
         } else {
-            setloading(false)
+            setloading(false);
         }
-
-        console.log('res', res)
-    }
+    };
 
     useEffect(() => {
         if (state) {
-            fetchProductType(state)
+            fetchProductType(state, panigate.page, panigate.limit);
         }
-    }, [state])
-    const onChange = () => { }
+    }, [state, panigate.page, panigate.limit]);
+
+    const onChange = (current, pageSize) => {
+        setPanigate({ ...panigate, page: current - 1, limit: pageSize });
+    };
+
+    // Lọc sản phẩm dựa trên searchDebounce
+    const filteredProducts = products?.data?.filter((product) => {
+        if (searchDebounce === '') {
+            return true; // Giữ lại tất cả sản phẩm nếu không có từ khóa tìm kiếm
+        }
+        // Chuyển đổi cả tên sản phẩm và từ khóa tìm kiếm sang chữ thường để so sánh
+        return product?.name?.toLowerCase().includes(searchDebounce.toLowerCase());
+    });
+
+
+
     return (
         <Loading isPending={loading}>
             <div style={{ width: '100%', backgroundColor: '#efefef', height: 'calc(100vh - 64px)' }}>
-                <div style={{ width: '1270px', margin: '0 auto' }}>
-                    <Row style={{ flexWrap: 'nowrap', paddingTop: '10px', }}>
-                        <WrapperNavbar span={4} >
+                <div style={{ width: '1270px', margin: '0 auto', height: '100%' }}>
+                    <Row style={{ flexWrap: 'nowrap', paddingTop: '10px', height: '100%' }}>
+                        <WrapperNavbar span={4}>
                             <NavBarComponent />
                         </WrapperNavbar>
                         <Col span={20} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                             <WrapperProducts>
-                                {products?.data?.map((product) => {
+                                {filteredProducts?.map((product) => {
                                     return (
                                         <CardComponent
                                             key={product._id}
@@ -56,18 +79,16 @@ const TyperProductPage = () => {
                                             selled={product.Number}
                                             id={product._id}
                                         />
-                                    )
+                                    );
                                 })}
                             </WrapperProducts>
-                            <Pagination defaultCurrent={2} total={100} onChange={onChange} style={{ textAlign: 'center', justifyContent: 'center', paddingTop: '10px' }} />
+                            <Pagination defaultCurrent={panigate.page + 1} total={panigate?.total} onChange={onChange} style={{ textAlign: 'center', justifyContent: 'center', paddingTop: '10px' }} />
                         </Col>
                     </Row>
                 </div>
             </div>
         </Loading>
+    );
+};
 
-
-    )
-}
-
-export default TyperProductPage
+export default TyperProductPage;
