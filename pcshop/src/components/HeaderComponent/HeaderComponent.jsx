@@ -15,6 +15,7 @@ import Loading from '../LoadingComponent/Loading';
 import { searchProduct } from '../../redux/slides/productSlide';
 
 export const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false }) => {
+    const order = useSelector((state) => state.order)
     const [search, setSearch] = useState('')
     const [userName, setUserName] = useState('')
     const [userAvatar, setUserAvatar] = useState('')
@@ -41,8 +42,8 @@ export const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false }
             setUserAvatar(user?.avatar);
         } else {
             // Nếu không có token, reset thông tin người dùng
-            setUserName(' ');
-            setUserAvatar(' ');
+            setUserName('');
+            setUserAvatar('');
             dispatch(resetUser());  // Đảm bảo Redux state cũng được reset
         }
         setLoading(false);
@@ -84,7 +85,7 @@ export const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false }
                         <WrapperHeaderAccount>
                             {user?.access_token ? (
                                 <>
-                                    <img src={userAvatar} alt='avatar' style={{
+                                    <img src={userAvatar} alt='' style={{
                                         height: '40px',
                                         width: '40px',
                                         borderRadius: '50%',
@@ -112,7 +113,7 @@ export const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false }
                     </Loading>
                     {!isHiddenCart && (
                         <div onClick={() => navigate('/order')} style={{ cursor: 'pointer' }}>
-                            <Badge count={4} size="small">
+                            <Badge count={order?.orderItems?.length} size="small">
                                 <ShoppingCartOutlined style={{ fontSize: '30px', color: '#fff' }} />
                             </Badge>
                             <WrapperTextHeaderSmall> Giỏ Hàng </WrapperTextHeaderSmall>

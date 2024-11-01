@@ -6,9 +6,14 @@ import { PlusOutlined, StarFilled, MinusOutlined } from '@ant-design/icons';
 import ButtonComponent from '../ButtonComponent/ButtonComponent';
 import * as ProductServices from '../../services/ProductServices';
 import { useQuery } from '@tanstack/react-query';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { addOrderProduct } from '../../redux/slides/orderSlide';
 
 const ProductDetailsComponent = ({ idProduct }) => {
+    const dispatch = useDispatch()
+    const location = useLocation()
+    const navigate = useNavigate()
     const user = useSelector((state) => state.user)
     const [numProduct, setNumProduct] = useState(1); // Khởi tạo với giá trị mặc định là 1
 
@@ -46,7 +51,45 @@ const ProductDetailsComponent = ({ idProduct }) => {
             setNumProduct((prev) => prev - 1); // Ngăn không cho giảm xuống dưới 1
         }
     };
+    const handleAddOrderProduct = () => {
+        if (!user?.id) {
+            navigate('/sign-in', { state: location?.pathname })
+        } else {
+            // {
+            //     name: {
+            //         type: String,
+            //             required: [true, 'không được để trống '],
+            //     },
+            //     amount: { //so lượng
+            //         type: Number,
+            //             required: [true, 'không được để trống '],
+            //     },
+            //     image: {
+            //         type: String,
+            //             required: [true, 'không được để trống '],
+            //     },
+            //     price: {
+            //         type: Number,
+            //             required: [true, 'không được để trống '],
+            //     },
+            //     product: { // join bảng product vào trong orderproduct
+            //         type: mongoose.Schema.Types.ObjectId,
+            //             ref: 'Product',
+            //                 required: true,
+            //     },
+            // }
+            dispatch(addOrderProduct({
+                orderItem: {
+                    name: productsDetails?.name,
+                    amount: numProduct,
+                    image: productsDetails?.image,
+                    price: productsDetails?.price,
+                    product: productsDetails?._id,
 
+                }
+            }))
+        }
+    }
     return (
         <loading isPending={isLoading}>
             <Row style={{ padding: '16px', background: '#fff', borderRadius: '4px' }}>
@@ -97,6 +140,7 @@ const ProductDetailsComponent = ({ idProduct }) => {
                                 border: 'none',
                                 borderRadius: '4px',
                             }}
+                            onClick={handleAddOrderProduct}
                             textButton={'Chọn Mua'}
                             styleTextButton={{ color: '#fff', fontSize: '15px', fontWeight: '700' }}
                         />
