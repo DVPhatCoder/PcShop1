@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { addOrderProduct } from '../../redux/slides/orderSlide';
+import { convertPrice } from '../../util';
 
 const ProductDetailsComponent = ({ idProduct }) => {
     const dispatch = useDispatch()
@@ -51,6 +52,7 @@ const ProductDetailsComponent = ({ idProduct }) => {
             setNumProduct((prev) => prev - 1); // Ngăn không cho giảm xuống dưới 1
         }
     };
+    console.log('productsDetails', productsDetails)
     const handleAddOrderProduct = () => {
         if (!user?.id) {
             navigate('/sign-in', { state: location?.pathname })
@@ -111,7 +113,7 @@ const ProductDetailsComponent = ({ idProduct }) => {
                     </div>
                     <WrapperPriceProduct>
                         <WrapperPriceTextProduct>
-                            {productsDetails?.price}
+                            {convertPrice(productsDetails?.price)}
                         </WrapperPriceTextProduct>
                     </WrapperPriceProduct>
                     <WrapperAddressProduct>

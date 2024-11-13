@@ -1,8 +1,188 @@
-import React from 'react'
-
+import { Button, Checkbox, Select } from 'antd';
+import React, { useEffect, useMemo, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
+import { WrapperCountOrder, WrapperInfor, WrapperInputNumber, WrapperItemOrder, WrapperLeft, WrapperListOrder, WrapperPriceDiscount, WrapperRight, WrapperStyleHeader, WrapperTotal } from './style'
+import { PlusOutlined, DeleteOutlined, MinusOutlined } from '@ant-design/icons';
+import { addOrderProduct, decreaseAmount, increaseAmount, removeAllOrderProduct, removeOrderProduct, selectedOrder } from '../../redux/slides/orderSlide';
+import { convertPrice } from '../../util';
+import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 const OrderPage = () => {
+    const dispatch = useDispatch()
+    const order = useSelector((state) => state.order);
+    const user = useSelector((state) => state.order);
+    const [listChecked, setListChecked] = useState([])
+    const onChange = (e) => {
+        if (listChecked.includes(e.target.value)) {
+            const newListCheck = listChecked.filter((item) => item !== e.target.value)
+            setListChecked(newListCheck)
+        } else {
+            setListChecked([...listChecked, e.target.value])
+        }
+    }
+    const handleChangeCount = (type, idProduct) => {
+        if (type === 'increase') {
+            dispatch(increaseAmount({ idProduct }))
+        } else {
+            dispatch(decreaseAmount({ idProduct }))
+        }
+
+    }
+    useEffect(() => {
+        dispatch(selectedOrder({ listChecked }))
+    }, [listChecked])
+    const handleOnchangeCheckAll = (e) => {
+        if (e.target.checked) {
+            const newListChecked = []
+            order?.orderItems?.forEach((item) => {
+                newListChecked.push(item?.product)
+            })
+            setListChecked(newListChecked)
+        } else {
+            setListChecked([])
+        }
+    }
+    const handleDelteOrder = (idProduct) => {
+        dispatch(removeOrderProduct({ idProduct }))
+    }
+    const handleRemoveAllOrder = () => {
+        if (listChecked?.length > 1) {
+            dispatch(removeAllOrderProduct({ listChecked }))
+        } else {
+        }
+
+    }
+    const priceMemo = useMemo(() => {
+        const result = order?.orderItemSlected?.reduce((total, cur) => {
+            return total + ((cur.price * cur.amount))
+        }, 0)
+        return result
+    }, [order])
+    const priceDiscountMemo = useMemo(() => {
+        const result = order?.orderItemSlected?.reduce((total, cur) => {
+            return total + ((cur.discount * cur.amount))
+        }, 0)
+        if (Number(result)) {
+
+            return result
+        }
+        return 0
+    }, [order])
+    const diliveryPriceMemo = useMemo(() => {
+        if (priceMemo > 100000) {
+            return 10000
+        } else if (priceMemo === 0) {
+            return 0
+        } else {
+            return 20000
+        }
+    }, [order])
+    const totalPriceMemo = useMemo(() => {
+        return Number(priceMemo) - Number(priceDiscountMemo) + Number(diliveryPriceMemo)
+    }, [priceMemo, priceDiscountMemo, diliveryPriceMemo])
+    const handleAddCart = () => {
+        if (!user?.phone || !user?.address || !user?.name || !user?.city) {
+
+
+        }
+    }
     return (
-        <div>OrderPage</div>
+        <div style={{ background: '#f5f5fa', width: '100%', height: '100vh' }}>
+            <div style={{ height: '100%', width: '1270px', marginLeft: '84px' }}>
+                <h3>Giỏ hàng</h3>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <WrapperLeft>
+                        <WrapperStyleHeader>
+                            <span style={{ margin: '10px 20px' }}>
+                                <Checkbox onChange={handleOnchangeCheckAll} checked={listChecked?.length === order?.orderItems?.length} style={{ margin: '0 5px' }} >
+                                </Checkbox>
+                                <span style={{ display: 'inline-block' }}>
+                                    tất cả ({order?.orderItems?.length}sản phẩm)
+                                </span>
+                            </span>
+                            <div style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'space-around', paddingLeft: '100px' }}>
+                                <span>Đơn giá</span>
+                                <span>Số lượng</span>
+                                <span>Thành Tiền</span>
+                                <DeleteOutlined style={{ cursor: 'pointer' }} onClick={handleRemoveAllOrder} />
+                            </div>
+                        </WrapperStyleHeader>
+
+                        <WrapperListOrder>
+                            {order?.orderItems?.map((order) => {
+                                return (
+                                    <WrapperItemOrder key={order?.product}>
+                                        <div style={{ width: '280px', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                            <Checkbox onChange={onChange} value={order?.product} checked={listChecked.includes(order?.product)} style={{ margin: '0 5px' }}></Checkbox>
+                                            <img src={order?.image} style={{ width: '77px', height: '79px', objectFit: 'cover' }} />
+                                            <div style={{ width: '260px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                {order?.name}
+                                            </div>
+                                        </div>
+                                        <div style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                            <span style={{ display: 'flex', width: '100px' }}>
+                                                <span style={{ fontSize: '13px', color: '#242424' }}>
+                                                    {convertPrice(order?.price)}
+                                                </span>
+                                            </span>
+                                            <WrapperCountOrder>
+                                                <button style={{ border: 'none', background: 'transparent', cursor: 'pointer' }} onClick={() => handleChangeCount('decrease', order?.product)}>
+                                                    <MinusOutlined style={{ color: '#000', fontSize: '20px' }} size="10px" />
+                                                </button>
+                                                <WrapperInputNumber defaultValue={order?.amount} value={order?.amount} size="small" />
+                                                <button style={{ border: 'none', background: 'transparent', cursor: 'pointer' }} onClick={() => handleChangeCount('increase', order?.product)}>
+                                                    <PlusOutlined style={{ color: '#000', fontSize: '20px' }} size="10px" />
+                                                </button>
+                                            </WrapperCountOrder>
+                                            <span style={{ color: 'rgb(255,66,78)', fontSize: '13px', fontWeight: 500, width: '110px' }}>{convertPrice(order?.price * order?.amount)} </span>
+                                            <DeleteOutlined style={{ cursor: 'pointer', }} onClick={() => handleDelteOrder(order?.product)} />
+                                        </div>
+                                    </WrapperItemOrder>
+                                )
+                            })}
+
+                        </WrapperListOrder>
+                    </WrapperLeft>
+                    <WrapperRight>
+
+                        <div style={{ width: '100%' }}>
+                            <WrapperInfor >
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <span>
+                                        Tạm Tính
+                                    </span>
+                                    <span style={{ color: '#000', fontSize: '14px', fontWeight: 'bold' }}>{convertPrice(priceMemo)}</span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '8px 0' }}>
+                                    <span>Giảm Giá</span>
+                                    <span style={{ color: '#000', fontSize: '14px', fontWeight: 'bold' }}>{`${priceDiscountMemo}%`}</span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '8px 0' }}>
+                                    <span>Phí giao hàng</span>
+                                    <span style={{ color: '#000', fontSize: '14px', fontWeight: 'bold' }}>{convertPrice(diliveryPriceMemo)}</span>
+                                </div>
+                            </WrapperInfor>
+                            <WrapperTotal>
+                                <span>Tổng Tiền</span>
+                                <div style={{ textAlign: 'right', marginLeft: '50px' }}>
+                                    <span style={{ display: 'flex', flexDirection: 'column', marginLeft: '50px' }}>
+                                        <span style={{ color: 'rgb(254,56,52)', fontSize: '24px', fontWeight: 'bold' }}>{convertPrice(totalPriceMemo)}</span>
+                                        <span style={{ color: '#000', fontSize: '11px' }}>(Đã bao gồm phí VAT)</span>
+                                    </span>
+                                </div>
+                            </WrapperTotal>
+                        </div>
+                        <ButtonComponent
+                            onClick={() => handleAddCart()}
+                            size={40}
+                            styleButton={{ background: 'rgb(255, 57,69)', height: '48px', border: 'none', borderRadius: '4px', width: '320px' }}
+                            textButton={'Mua hàng'}
+                            styleTextButton={{ color: '#fff', fontSize: '15px', fontWeight: '700' }}>
+                        </ButtonComponent>
+
+                    </WrapperRight>
+                </div>
+            </div>
+        </div>
     )
 }
 

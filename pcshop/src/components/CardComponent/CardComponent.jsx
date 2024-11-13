@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     StarFilled
 } from '@ant-design/icons';
+import { convertPrice } from '../../util';
 const CardComponent = (props) => {
     const { countInStock, description, image, name, price, rating, type, discount, selled, id } = props
     const navigate = useNavigate()
@@ -23,17 +24,17 @@ const CardComponent = (props) => {
             onClick={() => handleDetailsProduct(id)}
         >
             <WrapperImageStyle src={logo} style={{ with: '68px', height: '14px', position: 'absolute', top: 0, left: 0 }} > </WrapperImageStyle>
-            <StyleNameProduct> {name}</StyleNameProduct >
+            <StyleNameProduct style={{ width: '160px' }}> {name}</StyleNameProduct >
             < WrapperReportText>
                 <span style={{ marginRight: '4px' }}>
                     <span> {rating} <StarFilled style={{ fontSize: '12px', color: '#FFC400' }} /></span>
                 </span>
-                <WrapperStyleTextSell>| {selled || 1000}+</WrapperStyleTextSell>
+                <WrapperStyleTextSell style={{}}>| {selled || 1000}+</WrapperStyleTextSell>
             </ WrapperReportText>
             <WrapperPriceText>
-                <span style={{ marginRight: '8px' }}>{price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
+                <span style={{ marginRight: '8px' }}>{convertPrice(price)}</span>
                 <WrapperDiscountText >
-                    - {discount || 5} %
+                    - {discount || 1} %
                 </WrapperDiscountText>
             </WrapperPriceText>
 

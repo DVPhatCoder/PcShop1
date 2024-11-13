@@ -30,3 +30,12 @@ export const renderOptions = (arr) => {
     });
     return results;
 }
+
+export const convertPrice = (price) => {
+    try {
+        const result = price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }).replaceAll(',', '.').replace("₫", "đ");
+        return result
+    } catch (error) {
+        return null
+    }
+}

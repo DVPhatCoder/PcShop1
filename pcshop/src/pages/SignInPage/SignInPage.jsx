@@ -33,24 +33,21 @@ const SignInPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     useEffect(() => {
-        if (isSuccess && data?.status !== 'ERR') {
-            if (location) {
-                navigate(location?.state)
-            } else {
-                navigate('/')
-            }
-            Message.success();  // Hiển thị thông báo thành công
-            localStorage.setItem('access_token', JSON.stringify(data?.access_token))
+        if (isSuccess && data?.status !== 'Lỗi') {
+            navigate(location?.state || '/');
+            Message.success();
+            localStorage.setItem('access_token', JSON.stringify(data?.access_token));
             if (data?.access_token) {
-                const decoded = jwtDecode(data?.access_token)
+                const decoded = jwtDecode(data?.access_token);
                 if (decoded?.id) {
-                    handleGetDetailsUser(decoded?.id, data?.access_token)
+                    handleGetDetailsUser(decoded?.id, data?.access_token);
                 }
             }
         } else if (isError) {
-            Message.error();  // Hiển thị thông báo lỗi
+            Message.error();
         }
-    }, [isSuccess, isError])
+    }, [isSuccess, isError, data, navigate, location]);
+
     const handleGetDetailsUser = async (id, token) => {
         const res = await UserServices.getDetailsUser(id, token)
         dispatch(updateUser({ ...res?.data, access_token: token }))
@@ -91,7 +88,6 @@ const SignInPage = () => {
                         <ButtonComponent
                             disabled={!email.length || !password.length}
                             onClick={handleSignIn}
-
                             size={40}
                             styleButton={{
                                 background: 'rgb( 255, 57, 69)',
@@ -103,7 +99,6 @@ const SignInPage = () => {
 
 
                             }}
-
                             textButton={'Đăng Nhập'}
                             styleTextButton={{ color: '#fff', fontSize: '15px', fontWeight: '700', }}
 

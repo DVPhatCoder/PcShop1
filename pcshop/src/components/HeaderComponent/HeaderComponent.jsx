@@ -42,8 +42,8 @@ export const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false }
             setUserAvatar(user?.avatar);
         } else {
             // Nếu không có token, reset thông tin người dùng
-            setUserName('');
-            setUserAvatar('');
+            setUserName(null);
+            setUserAvatar(null);
             dispatch(resetUser());  // Đảm bảo Redux state cũng được reset
         }
         setLoading(false);
@@ -85,7 +85,7 @@ export const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false }
                         <WrapperHeaderAccount>
                             {user?.access_token ? (
                                 <>
-                                    <img src={userAvatar} alt='' style={{
+                                    <img src={userAvatar} alt='avatar' style={{
                                         height: '40px',
                                         width: '40px',
                                         borderRadius: '50%',

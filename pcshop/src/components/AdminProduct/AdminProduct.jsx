@@ -43,6 +43,8 @@ const AdminProduct = () => {
         rating: '',
         description: '',
         newType: '',
+        discount: '',
+
     })
     const [stateProductDetail, setStateProductDetail] = useState({
         name: '',
@@ -52,6 +54,7 @@ const AdminProduct = () => {
         countInStock: '',
         rating: '',
         description: '',
+        discount: '',
     })
     const [form] = Form.useForm();
     const mutation = useMutationHooks(
@@ -64,7 +67,8 @@ const AdminProduct = () => {
                     price,
                     rating,
                     description,
-                    countInStock
+                    countInStock,
+                    discount,
                 } = data;
                 const res = await ProductServices.createProduct({
                     name,
@@ -73,7 +77,8 @@ const AdminProduct = () => {
                     price,
                     rating,
                     description,
-                    countInStock
+                    countInStock,
+                    discount,
                 });
                 return res;
             } catch (error) {
@@ -147,6 +152,7 @@ const AdminProduct = () => {
                 description: res?.data?.description,
                 rating: res?.data?.rating,
                 image: res?.data?.image,
+                discount: res?.data?.discount,
             })
         }
         setIsPendingUpdate(false)
@@ -414,10 +420,34 @@ const AdminProduct = () => {
             },
         },
         {
+            title: 'Giảm giá',
+            dataIndex: 'discount',
+            filters: [
+                {
+                    text: 'Nhỏ hơn 50%',
+                    value: 'lessThan50',
+                },
+                {
+                    text: 'Lớn hơn 50%',
+                    value: 'greaterThan50',
+                },
+            ],
+            onFilter: (value, record) => {
+                switch (value) {
+                    case 'lessThan50':
+                        return record.discount < 50; // Kiểm tra nếu countInStock nhỏ hơn 50
+                    case 'greaterThan50':
+                        return record.discount > 50; // Kiểm tra nếu countInStock lớn hơn 50
+                    default:
+                        return true; // Mặc định trả về true nếu không khớp
+                }
+            },
+        },
+        {
             title: 'Mô tả',
             dataIndex: 'description',
             sorter: (a, b) => a.type.localeCompare(b.type, 'vi'),
-            render: (text) => truncateText(text, 30), // Giới hạn 30 ký tự
+            render: (text) => truncateText(text, 20), // Giới hạn 30 ký tự
         },
         {
             title: 'Action',
@@ -483,6 +513,7 @@ const AdminProduct = () => {
             countInStock: '',
             rating: '',
             description: '',
+            discount: '',
         })
         form.resetFields()
     };
@@ -497,6 +528,7 @@ const AdminProduct = () => {
             countInStock: '',
             rating: '',
             description: '',
+            discount: '',
         })
         form.resetFields()
     };
@@ -520,6 +552,7 @@ const AdminProduct = () => {
             countInStock: stateProduct.countInStock,
             rating: stateProduct.rating,
             description: stateProduct.description,
+            discount: stateProduct.discount
         }
         mutation.mutate(params, {
             onSettled: () => {
@@ -686,6 +719,18 @@ const AdminProduct = () => {
                                 <InputComponent value={stateProduct.description} onChange={handleOnChange} name="description" />
                             </Form.Item>
                             <Form.Item
+                                label="Giảm Giá"
+                                name="discount"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: 'Vui lòng nhập Giảm Giá!',
+                                    },
+                                ]}
+                            >
+                                <InputComponent value={stateProduct.discount} onChange={handleOnChange} name="discount" />
+                            </Form.Item>
+                            <Form.Item
                                 label="Đánh giá"
                                 name="rating"
                                 rules={[
@@ -800,6 +845,18 @@ const AdminProduct = () => {
                                 ]}
                             >
                                 <InputComponent value={stateProductDetail.description} onChange={handleOnChangeDetail} name="description" />
+                            </Form.Item>
+                            <Form.Item
+                                label="Giảm giá"
+                                name="discount"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: 'Vui lòng nhập Giảm giá!',
+                                    },
+                                ]}
+                            >
+                                <InputComponent value={stateProductDetail.discount} onChange={handleOnChangeDetail} name="discount" />
                             </Form.Item>
                             <Form.Item
                                 label="Đánh giá"

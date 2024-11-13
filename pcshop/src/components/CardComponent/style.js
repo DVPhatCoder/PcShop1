@@ -27,6 +27,7 @@ export const StyleNameProduct = styled.div`
     margin: 0px 0px 8px
 `
 export const WrapperReportText = styled.div`
+   
     font-size: 10px;
     color: rgb(128,128,137);
     display: flex;
@@ -39,6 +40,7 @@ export const WrapperPriceText = styled.div`
     margin: 4px 0px 0px;
 `
 export const WrapperDiscountText = styled.span`
+    width:160px;
     font-size: 12px;
    color: rgb(255,66,78);
     white-space: nowrap;

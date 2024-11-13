@@ -206,7 +206,7 @@ const AdminUser = () => {
             />
         ),
         onFilter: (value, record) =>
-            record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+            (record[dataIndex]?.toString() || '').toLowerCase().includes(value.toLowerCase()),
         onFilterDropdownOpenChange: (visible) => {
             if (visible) {
                 setTimeout(() => searchInput.current?.select(), 100);
@@ -270,7 +270,7 @@ const AdminUser = () => {
             title: 'ngày tạo',
             dataIndex: 'createdAt',
             sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt), // Sắp xếp ngày
-            render: (text) => dayjs(text).format('DD/MM/YYYY'), // Định dạng ngày hiển thị
+            render: (text) => dayjs(text || '').format('DD/MM/YYYY'), // Nếu `text` là null hoặc undefined, nó sẽ sử dụng chuỗi rỗng
             ...getColumnSearchProps('createdAt')
         },
         {
@@ -286,11 +286,16 @@ const AdminUser = () => {
             render: renderAction
         },
     ];
-    const dataTable = users?.data?.length && users?.data?.map((user) => {
-        return {
-            ...user, key: user._id, isAdmin: user?.isAdmin ? 'True' : 'False'
-        }
-    })
+    const dataTable = users?.data?.length
+        ? users?.data?.map((user) => {
+            return {
+                ...user,
+                key: user._id,
+                isAdmin: user?.isAdmin ? 'True' : 'False',
+            };
+        })
+        : [];
+
     useEffect(() => {
         if (isSuccessUpdated) {
             if (dataUpdated?.status === 'thành công') {
