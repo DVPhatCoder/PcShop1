@@ -29,6 +29,9 @@ const userSchema = new mongoose.Schema(
         avatar: {
             type: String,
         },
+        city: {
+            type: String,
+        }
     },
     {
         timestamps: true // thoi gian tao vao update

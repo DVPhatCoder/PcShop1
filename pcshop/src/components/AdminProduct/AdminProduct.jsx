@@ -298,7 +298,8 @@ const AdminProduct = () => {
             title: 'Tên sản phẩm',
             dataIndex: 'name',
             sorter: (a, b) => a.name.localeCompare(b.name, 'vi'),
-            ...getColumnSearchProps('name')
+            ...getColumnSearchProps('name'),
+            render: (text) => truncateText(text, 30), // Giới hạn 30 ký tự
         },
         {
             title: 'Giá sản phẩm',
@@ -447,7 +448,7 @@ const AdminProduct = () => {
             title: 'Mô tả',
             dataIndex: 'description',
             sorter: (a, b) => a.type.localeCompare(b.type, 'vi'),
-            render: (text) => truncateText(text, 20), // Giới hạn 30 ký tự
+            render: (text) => truncateText(text, 20), // Giới hạn 20 ký tự
         },
         {
             title: 'Action',

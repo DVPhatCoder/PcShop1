@@ -37,6 +37,7 @@ const AdminUser = () => {
     const [form] = Form.useForm();
     const mutationUpdate = useMutationHooks(
         async (data) => {
+            console.log('data', data)
             try {
                 const { id, token, ...rests } = data;
                 const res = await UserServices.updateUser(id, { ...rests }, token);
@@ -47,6 +48,7 @@ const AdminUser = () => {
         }
 
     );
+
     const mutationDeleted = useMutationHooks(
         async (data) => {
             try {
