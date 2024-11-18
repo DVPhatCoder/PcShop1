@@ -13,8 +13,9 @@ import { useMutationHooks } from '../../hooks/useMutationHook';
 import * as UserServices from '../../services/UserServices'
 import * as Message from '../../components/Message/Message'
 import { updateUser } from '../../redux/slides/useSlide';
+import { useNavigate } from 'react-router-dom';
 const OrderPage = () => {
-
+    const navigate = useNavigate()
     const [isModalOpenUpdateInfor, setIsModalOpenUpdateInfor] = useState(false)
     const dispatch = useDispatch()
     const order = useSelector((state) => state.order);
@@ -85,6 +86,9 @@ const OrderPage = () => {
             setListChecked([])
         }
     }
+    const handleAddAdress = () => {
+        setIsModalOpenUpdateInfor(true)
+    }
     const handleDelteOrder = (idProduct) => {
         dispatch(removeOrderProduct({ idProduct }))
     }
@@ -106,7 +110,6 @@ const OrderPage = () => {
             return total + ((cur.discount * cur.amount))
         }, 0)
         if (Number(result)) {
-
             return result
         }
         return 0
@@ -129,6 +132,8 @@ const OrderPage = () => {
             Message.error('Vui lòng chọn sản phẩm!');
         } else if (!user?.phone || !user?.address || !user?.name || !user?.city) {
             setIsModalOpenUpdateInfor(true)
+        } else {
+            navigate('/payment')
         }
     }
     const { data, isPending: isPendingUpdated } = mutationUpdate
@@ -171,7 +176,7 @@ const OrderPage = () => {
     };
 
     return (
-        <div style={{ background: '#f5f5fa', width: '100%', height: '100vh' }}>
+        <div style={{ background: '#f5f5fa', width: '100%', height: '100vh', fontSize: '14px' }}>
             <div style={{ height: '100%', width: '1270px', marginLeft: '84px' }}>
                 <h3>Giỏ hàng</h3>
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -219,7 +224,7 @@ const OrderPage = () => {
                                                 </button>
                                             </WrapperCountOrder>
                                             <span style={{ color: 'rgb(255,66,78)', fontSize: '13px', fontWeight: 500, width: '110px' }}>{convertPrice(order?.price * order?.amount)} </span>
-                                            <DeleteOutlined style={{ cursor: 'pointer', }} onClick={() => handleDelteOrder(order?.product)} />
+                                            <DeleteOutlined style={{ cursor: 'pointer', marginRight: '25px' }} onClick={() => handleDelteOrder(order?.product)} />
                                         </div>
                                     </WrapperItemOrder>
                                 )
@@ -228,9 +233,17 @@ const OrderPage = () => {
                         </WrapperListOrder>
                     </WrapperLeft>
                     <WrapperRight>
-
                         <div style={{ width: '100%' }}>
-                            <WrapperInfor >
+                            <WrapperInfor style={{ background: '#FFFFFD', marginBottom: '10px' }} >
+                                <div style={{ display: 'flex', alignItems: 'center', }}>
+                                    <span style={{ marginRight: '5px' }}>
+                                        Địa chỉ :
+                                    </span>
+                                    <span style={{ fontWeight: 'bold', }}>{`${user?.address} ${user?.city}`}</span>
+                                    <span onClick={handleAddAdress} style={{ color: 'blue', cursor: 'pointer', marginLeft: '10px' }}>Thay đổi</span>
+                                </div>
+                            </WrapperInfor>
+                            <WrapperInfor style={{ background: '#FFFFFD' }} >
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                     <span>
                                         Tạm Tính
@@ -266,7 +279,7 @@ const OrderPage = () => {
 
                     </WrapperRight>
                 </div>
-            </div>
+            </div >
             <ModalComponent forceRender title="Cập nhập thông tin giao hàng" open={isModalOpenUpdateInfor} onCancel={handleCancelUpdateInfor} onOk={handleUpdateInfor}>
                 <Loading isPending={isPendingUpdated}>
                     <Form
@@ -333,7 +346,7 @@ const OrderPage = () => {
                 </Loading>
 
             </ModalComponent>
-        </div>
+        </div >
     )
 }
 

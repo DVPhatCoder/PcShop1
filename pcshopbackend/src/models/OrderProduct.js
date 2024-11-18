@@ -39,7 +39,7 @@ const orderSchema = new mongoose.Schema({
             required: [true, 'không được để trống '],
         },
         phone: {
-            type: number,
+            type: Number,
             required: [true, 'không được để trống '],
         },
     },
@@ -52,10 +52,6 @@ const orderSchema = new mongoose.Schema({
         required: true
     },
     shippingPrice: { //gia ship
-        type: Number,
-        required: true
-    },
-    taxPrice: { //thue san pham
         type: Number,
         required: true
     },
