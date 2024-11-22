@@ -13,14 +13,15 @@ import * as UserServices from '../../services/UserServices'
 import * as OrderServices from '../../services/OrderServices'
 import * as Message from '../../components/Message/Message'
 import { updateUser } from '../../redux/slides/useSlide';
+import { useNavigate } from 'react-router-dom';
 const PaymentPage = () => {
+    const navigate = useNavigate()
     const [isModalOpenUpdateInfor, setIsModalOpenUpdateInfor] = useState(false)
     const dispatch = useDispatch()
     const order = useSelector((state) => state.order);
     const user = useSelector((state) => state.user);
     const [delivery, setDelivery] = useState('fast')
     const [payment, setPayment] = useState('last_money')
-    const [listChecked, setListChecked] = useState([])
     const [stateUserDetail, setStateUserDetail] = useState({
         name: '',
         phone: '',
@@ -40,6 +41,7 @@ const PaymentPage = () => {
         }
 
     );
+
     const mutationAddOrder = useMutationHooks(
         async (data) => {
             try {
@@ -47,7 +49,7 @@ const PaymentPage = () => {
                 const res = await OrderServices.createOrder({ ...rests }, token);
                 return res;
             } catch (error) {
-                console.error("Lỗi khi cập nhập người dùng:", error.response?.data || error.message);
+                console.error("Lỗi khi thêm sản phẩm:", error.response?.data || error.message);
             }
         }
 
@@ -55,11 +57,6 @@ const PaymentPage = () => {
     useEffect(() => {
         form.setFieldsValue(stateUserDetail)
     }, [form, stateUserDetail])
-
-    useEffect(() => {
-        dispatch(selectedOrder({ listChecked }))
-    }, [listChecked])
-
     useEffect(() => {
         if (isModalOpenUpdateInfor) {
             setStateUserDetail({
@@ -104,7 +101,7 @@ const PaymentPage = () => {
             mutationAddOrder.mutate({
                 token: user?.access_token,
                 orderItem: order?.orderItemSlected,
-                fullname: user?.name,
+                fullName: user?.name,
                 address: user?.address,
                 phone: user?.phone,
                 city: user?.city,
@@ -117,9 +114,17 @@ const PaymentPage = () => {
             }, {
                 onSuccess: () => {
                     Message.success('Đặt hàng thành công')
+                    navigate('/orderSuccess', {
+                        state: {
+                            delivery,
+                            payment,
+                            orders: order?.orderItemSlected
+                        }
+                    })
                 }
             }
             )
+
         }
     }
     const handleAddAdress = () => {
@@ -127,7 +132,6 @@ const PaymentPage = () => {
     }
     const { data, isPending: isPendingUpdated } = mutationUpdate
     const { isPending: isPendingAddOrder } = mutationAddOrder
-    console.log('data', data)
     const handleCancelUpdateInfor = () => {
         setStateUserDetail({
             name: '',
@@ -174,7 +178,7 @@ const PaymentPage = () => {
         <div style={{ background: '#f5f5fa', width: '100%', height: '100vh', fontSize: '14px' }}>
             <Loading isPending={isPendingAddOrder}>
                 <div style={{ height: '100%', width: '1270px', marginLeft: '84px' }}>
-                    <h3>Chọn phương thức thanh toán</h3>
+                    <h3>Thanh toán</h3>
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                         <WrapperLeft>
                             <WrapperInfor>
@@ -189,6 +193,7 @@ const PaymentPage = () => {
                                 <div><label>Chọn phương thức thanh toán</label>
                                     <WrapperRadio onChange={handlePayment} value={payment}>
                                         <Radio value="last_money">Thanh toán trước khi nhận hàng</Radio>
+                                        <Radio value="scam_money">Scam</Radio>
                                     </WrapperRadio>
                                 </div>
                             </WrapperInfor>

@@ -52,7 +52,6 @@ const ProductDetailsComponent = ({ idProduct }) => {
             setNumProduct((prev) => prev - 1); // Ngăn không cho giảm xuống dưới 1
         }
     };
-    console.log('productsDetails', productsDetails)
     const handleAddOrderProduct = () => {
         if (!user?.id) {
             navigate('/sign-in', { state: location?.pathname })

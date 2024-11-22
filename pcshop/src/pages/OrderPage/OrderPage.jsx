@@ -137,7 +137,6 @@ const OrderPage = () => {
         }
     }
     const { data, isPending: isPendingUpdated } = mutationUpdate
-    console.log('data', data)
     const handleCancelUpdateInfor = () => {
         setStateUserDetail({
             name: '',
