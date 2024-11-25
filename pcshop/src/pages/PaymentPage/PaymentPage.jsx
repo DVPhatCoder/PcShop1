@@ -1,8 +1,8 @@
-import { Form, Radio, } from 'antd';
+import { Form, message, Radio, } from 'antd';
 import React, { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { WrapperInfor, WrapperLeft, WrapperRight, WrapperTotal, WrapperRadio } from './style'
-import { selectedOrder } from '../../redux/slides/orderSlide';
+import { removeAllOrderProduct, removeOrderProduct, selectedOrder } from '../../redux/slides/orderSlide';
 import { convertPrice } from '../../util';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import { ModalComponent } from '../../components/ModalComponent/ModalComponent';
@@ -43,6 +43,7 @@ const PaymentPage = () => {
     );
 
     const mutationAddOrder = useMutationHooks(
+
         async (data) => {
             try {
                 const { token, ...rests } = data;
@@ -111,27 +112,39 @@ const PaymentPage = () => {
                 totalPrice: totalPriceMemo,
                 user: user?.id,
 
-            }, {
-                onSuccess: () => {
-                    Message.success('Đặt hàng thành công')
-                    navigate('/orderSuccess', {
-                        state: {
-                            delivery,
-                            payment,
-                            orders: order?.orderItemSlected
-                        }
-                    })
-                }
             }
             )
-
         }
     }
     const handleAddAdress = () => {
         setIsModalOpenUpdateInfor(true)
     }
-    const { data, isPending: isPendingUpdated } = mutationUpdate
-    const { isPending: isPendingAddOrder } = mutationAddOrder
+    const { isPending: isPendingUpdated } = mutationUpdate
+    const { data, isPending: isPendingAddOrder, isError, isSuccess } = mutationAddOrder
+
+    useEffect(() => {
+
+        if (isSuccess && data?.status === 'thành công') {
+            const arrayOrder = []
+            order?.orderItemSlected?.forEach(element => {
+                arrayOrder.push(element.product)
+            });
+            dispatch(removeAllOrderProduct({ listChecked: arrayOrder }));
+            Message.success('Đặt hàng thành công');
+            navigate('/orderSuccess', {
+                state: {
+                    delivery,
+                    payment,
+                    orders: order?.orderItemSlected,
+                    totalPriceMemo,
+                },
+            });
+
+        } else if (isError) {
+            Message.error('Đặt hàng thất bại');
+        }
+    }, [isError, isSuccess,])
+
     const handleCancelUpdateInfor = () => {
         setStateUserDetail({
             name: '',
@@ -256,7 +269,7 @@ const PaymentPage = () => {
                             wrapperCol={{
                                 span: 20,
                             }}
-                            // onFinish={onUpdateUser}
+                            // onFinish={mutationUpdate}
                             autoComplete="off"
                             form={form}
                         >

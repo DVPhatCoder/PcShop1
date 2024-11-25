@@ -1,4 +1,4 @@
-import { Checkbox, Form, } from 'antd';
+import { Checkbox, Form, Steps, } from 'antd';
 import React, { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { WrapperCountOrder, WrapperInfor, WrapperInputNumber, WrapperItemOrder, WrapperLeft, WrapperListOrder, WrapperPriceDiscount, WrapperRight, WrapperStyleHeader, WrapperTotal } from './style'
@@ -15,6 +15,8 @@ import * as Message from '../../components/Message/Message'
 import { updateUser } from '../../redux/slides/useSlide';
 import { useNavigate } from 'react-router-dom';
 const OrderPage = () => {
+    const description = 'This is a description.';
+    const { Step } = Steps;
     const navigate = useNavigate()
     const [isModalOpenUpdateInfor, setIsModalOpenUpdateInfor] = useState(false)
     const dispatch = useDispatch()
@@ -115,12 +117,12 @@ const OrderPage = () => {
         return 0
     }, [order])
     const diliveryPriceMemo = useMemo(() => {
-        if (priceMemo > 100000) {
-            return 10000
-        } else if (priceMemo === 0) {
+        if (priceMemo <= 10000000 && priceMemo !== 0) {
+            return 200000
+        } else if (priceMemo === 0 || priceMemo >= 30000000) {
             return 0
         } else {
-            return 20000
+            return 100000
         }
     }, [order])
     const totalPriceMemo = useMemo(() => {
@@ -173,7 +175,6 @@ const OrderPage = () => {
             [e.target.name]: e.target.value
         });
     };
-
     return (
         <div style={{ background: '#f5f5fa', width: '100%', height: '100vh', fontSize: '14px' }}>
             <div style={{ height: '100%', width: '1270px', marginLeft: '84px' }}>

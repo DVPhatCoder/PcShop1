@@ -86,3 +86,12 @@ gap:10px;
 justify-content:center;
 
 `
+export const WrapperTotalMoney = styled.div`
+margin: 20px auto ;
+   display:flex;
+  align-items: center;
+  padding: 10px 0;
+ width:850px;
+ justtify-content:center;
+
+`

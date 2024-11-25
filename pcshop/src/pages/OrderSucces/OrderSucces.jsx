@@ -1,7 +1,7 @@
 
 import React, { } from 'react'
 import { useSelector } from 'react-redux';
-import { WrapperInfor, WrapperContainer, WrapperValue } from './style'
+import { WrapperInfor, WrapperContainer, WrapperValue, WrapperTotal, WrapperTotalMoney } from './style'
 import Loading from '../../components/LoadingComponent/Loading';
 import { WrapperItemOrder } from './style';
 import { WrapperCountOrder } from './style';
@@ -56,12 +56,17 @@ const OrderSucces = () => {
                                                         Số lượng:{order?.amount}
                                                     </span>
                                                 </span>
+
                                                 <span style={{ color: 'rgb(255,66,78)', fontSize: '13px', fontWeight: 500, width: '200px' }}>Thành tiền:{convertPrice(order?.price * order?.amount)} </span>
                                             </div>
                                         </WrapperItemOrder>
+
                                     )
                                 })}
                             </WrapperInfor>
+                            <WrapperTotalMoney>
+                                <span style={{ marginLeft: 'auto', color: 'rgb(255,66,78)', fontSize: '16px', fontWeight: 'bold', width: '200px' }}>Tổng tiền:{convertPrice(state?.totalPriceMemo)}</span>
+                            </WrapperTotalMoney>
                         </WrapperContainer>
                     </div>
                 </div >
