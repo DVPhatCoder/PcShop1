@@ -17,7 +17,6 @@ const ProductDetailsComponent = ({ idProduct }) => {
     const navigate = useNavigate()
     const user = useSelector((state) => state.user)
     const [numProduct, setNumProduct] = useState(1); // Khởi tạo với giá trị mặc định là 1
-
     const onChange = (e) => {
         const value = Number(e.target.value);
         setNumProduct(isNaN(value) ? 1 : value); // Nếu giá trị không hợp lệ, đặt về 1
@@ -79,6 +78,7 @@ const ProductDetailsComponent = ({ idProduct }) => {
             //                 required: true,
             //     },
             // }
+
             dispatch(addOrderProduct({
                 orderItem: {
                     name: productsDetails?.name,
@@ -86,8 +86,11 @@ const ProductDetailsComponent = ({ idProduct }) => {
                     image: productsDetails?.image,
                     price: productsDetails?.price,
                     product: productsDetails?._id,
+                    selled: productsDetails?.selled,
+                    discount: productsDetails?.discount,
 
                 }
+
             }))
         }
     }
@@ -108,12 +111,16 @@ const ProductDetailsComponent = ({ idProduct }) => {
                     <WrapperStyleNameProduct>{productsDetails?.name}</WrapperStyleNameProduct>
                     <div>
                         {renderStars(productsDetails?.rating || 0)}
-                        <WrapperStyleTextSell>| Đã bán 1000+</WrapperStyleTextSell>
+                        <WrapperStyleTextSell>| Đã bán {productsDetails?.selled || 0}+</WrapperStyleTextSell>
                     </div>
                     <WrapperPriceProduct>
                         <WrapperPriceTextProduct>
                             {convertPrice(productsDetails?.price)}
+                            <span style={{ padding: '0 10px' }}>
+                                -{productsDetails?.discount || 0}%
+                            </span>
                         </WrapperPriceTextProduct>
+
                     </WrapperPriceProduct>
                     <WrapperAddressProduct>
                         <span>Giao Đến</span>

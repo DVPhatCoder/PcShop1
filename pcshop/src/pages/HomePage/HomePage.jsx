@@ -15,9 +15,9 @@ import { useDebounce } from '../../hooks/useDebounce'
 
 const HomePage = () => {
     const [limit, setLimit] = useState(12)
-    const searchProduct = useSelector((state) => state?.product?.search)
+    const searchProduct = useSelector((state) => state?.product?.search)// Lấy giá trị tìm kiếm từ Redux
     const searchDebounce = useDebounce(searchProduct, 500)
-    const [typeProducts, setTypeProducts] = useState([])
+    const [typeProducts, setTypeProducts] = useState([]) // lấy giá trị từ typeproduct
     const fetchProductAll = async (context) => {
         const limit = context?.queryKey && context?.queryKey[1]
         const search = context?.queryKey && context?.queryKey[2]
@@ -30,10 +30,8 @@ const HomePage = () => {
             setTypeProducts(res?.data)
         }
     }
-
     useEffect(() => {
         fetchAllTypeProduct()
-
     }, [])
     const { data: products, isLoading, isPreviousData, } = useQuery({
         queryKey: ['products', limit, searchDebounce],   // Sử dụng mảng cho khóa query
@@ -69,8 +67,8 @@ const HomePage = () => {
                                     price={product.price}
                                     rating={product.rating}
                                     type={product.type}
-                                    discount={product.Number}
-                                    selled={product.Number}
+                                    discount={product.discount}
+                                    selled={product.selled}
                                     id={product._id}
                                 />
                             )

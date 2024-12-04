@@ -15,7 +15,7 @@ const createProduct = (newProduct) => {
             }
 
             const newProduct = await Product.create({
-                name, image, type, price, countInStock, rating, description, discount
+                name, image, type, price, countInStock: Number(countInStock), rating, description, discount: Number(discount)
             })
             if (newProduct) {
                 resolve({
@@ -120,7 +120,6 @@ const deleteProduct = (id) => {
 const getAllProdcut = (limit, page, sort, filter) => {
     return new Promise(async (resolve, reject) => {
         try {
-
             const totalProducct = await Product.countDocuments()
             if (filter) {
                 const label = filter[0]

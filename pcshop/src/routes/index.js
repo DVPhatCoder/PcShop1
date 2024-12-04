@@ -10,6 +10,7 @@ import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import SignInPage from "../pages/SignInPage/SignInPage";
 import SignUpPage from "../pages/SignUpPage/SignUpPage";
 import TyperProductPage from "../pages/TypeProductPage/TyperProductPage";
+import MyOrderPage from "../pages/MyOrderPage/MyOrderPage";
 export const routes = [
     {
         path: '/',
@@ -44,6 +45,11 @@ export const routes = [
     {
         path: '/sign-in',
         page: SignInPage,
+        isShowHeader: true
+    },
+    {
+        path: '/my-order',
+        page: MyOrderPage,
         isShowHeader: true
     },
     {

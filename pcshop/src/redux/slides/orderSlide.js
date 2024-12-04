@@ -26,12 +26,10 @@ export const orderSlide = createSlice({
     reducers: {
         addOrderProduct: (state, action) => {
             const { orderItem } = action.payload;
-
             // Kiểm tra orderItems có phải là mảng không
             if (!Array.isArray(state.orderItems)) {
                 state.orderItems = []; // Khởi tạo lại nếu không phải mảng
             }
-
             const itemOrder = state.orderItems.find((item) => item.product === orderItem.product);
             if (itemOrder) {
                 itemOrder.amount += orderItem.amount;
@@ -85,14 +83,12 @@ export const orderSlide = createSlice({
         selectedOrder: (state, action) => {
             const { listChecked } = action.payload;
             const orderSelected = [];
-
             // Kiểm tra sự tồn tại của các phần tử trong orderItems trước khi thêm vào orderItemSlected
             state.orderItems.forEach((order) => {
                 if (listChecked.includes(order.product)) {
                     orderSelected.push(order);
                 }
             });
-
             state.orderItemSlected = orderSelected;
         }
 

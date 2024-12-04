@@ -4,16 +4,13 @@ import { useSelector } from 'react-redux';
 import { WrapperInfor, WrapperContainer, WrapperValue, WrapperTotal, WrapperTotalMoney } from './style'
 import Loading from '../../components/LoadingComponent/Loading';
 import { WrapperItemOrder } from './style';
-import { WrapperCountOrder } from './style';
-import { WrapperInputNumber } from './style';
 import { useLocation } from 'react-router-dom';
 import { orderContant } from '../../contant';
 import { convertPrice } from '../../util';
 const OrderSucces = () => {
-    const order = useSelector((state) => state.order);
-    const localtion = useLocation()
-    console.log('localtion', localtion)
-    const { state } = localtion
+    const order = useSelector((state) => state?.order);
+    const location = useLocation()
+    const { state } = location
     return (
         <div style={{ background: '#f5f5fa', width: '100%', height: '100vh', fontSize: '14px' }}>
             <Loading isPending={false}>
@@ -40,7 +37,7 @@ const OrderSucces = () => {
                                     return (
                                         <WrapperItemOrder key={order?.product}>
                                             <div style={{ width: '280px', display: 'flex', alignItems: 'center', gap: 4 }}>
-                                                <img src={order.image} style={{ width: '77px', height: '79px', objectFit: 'cover' }} />
+                                                <img src={order?.image} style={{ width: '77px', height: '79px', objectFit: 'cover' }} />
                                                 <div style={{ width: '260px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginLeft: '10px', }}>
                                                     {order?.name}
                                                 </div>

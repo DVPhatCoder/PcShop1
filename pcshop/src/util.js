@@ -15,7 +15,7 @@ export const getBase64 = (file) =>
         reader.onerror = (error) => reject(error);
     })
 export const renderOptions = (arr) => {
-    let results = []; // Đổi từ const sang let
+    let results = [];
     if (arr) {
         results = arr?.map((opt) => {
             return {

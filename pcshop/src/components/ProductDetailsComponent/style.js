@@ -31,8 +31,8 @@ export const WrapperPriceTextProduct = styled.h1`
     font-size: 24px;
     font-weight: 600;
     line-height: 150%;
-    padding: 10px;
-    margin: 10px;
+    padding: 10 10px;
+    margin: 10 10px;
 `
 export const WrapperAddressProduct = styled.div`
     span.address{

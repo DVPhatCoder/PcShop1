@@ -43,7 +43,6 @@ const PaymentPage = () => {
     );
 
     const mutationAddOrder = useMutationHooks(
-
         async (data) => {
             try {
                 const { token, ...rests } = data;
@@ -101,7 +100,7 @@ const PaymentPage = () => {
         if (user?.access_token && order?.orderItemSlected && user?.name && user?.address && user?.phone && user?.city && priceMemo && user?.id) {
             mutationAddOrder.mutate({
                 token: user?.access_token,
-                orderItem: order?.orderItemSlected,
+                orderItems: order?.orderItemSlected,
                 fullName: user?.name,
                 address: user?.address,
                 phone: user?.phone,
@@ -111,7 +110,6 @@ const PaymentPage = () => {
                 shippingPrice: diliveryPriceMemo,
                 totalPrice: totalPriceMemo,
                 user: user?.id,
-
             }
             )
         }
@@ -123,7 +121,6 @@ const PaymentPage = () => {
     const { data, isPending: isPendingAddOrder, isError, isSuccess } = mutationAddOrder
 
     useEffect(() => {
-
         if (isSuccess && data?.status === 'thành công') {
             const arrayOrder = []
             order?.orderItemSlected?.forEach(element => {
@@ -137,13 +134,13 @@ const PaymentPage = () => {
                     payment,
                     orders: order?.orderItemSlected,
                     totalPriceMemo,
+
                 },
             });
-
-        } else if (isError) {
+        } else if (isError && data?.status === 'thất bại') {
             Message.error('Đặt hàng thất bại');
         }
-    }, [isError, isSuccess,])
+    }, [isError, isSuccess])
 
     const handleCancelUpdateInfor = () => {
         setStateUserDetail({

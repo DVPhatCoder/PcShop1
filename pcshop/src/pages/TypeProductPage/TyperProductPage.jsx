@@ -53,7 +53,6 @@ const TyperProductPage = () => {
     });
 
 
-
     return (
         <Loading isPending={loading}>
             <div style={{ width: '100%', backgroundColor: '#efefef', height: 'calc(100vh - 64px)' }}>

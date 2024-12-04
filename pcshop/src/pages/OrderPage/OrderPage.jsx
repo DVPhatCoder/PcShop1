@@ -1,7 +1,7 @@
 import { Checkbox, Form, Steps, } from 'antd';
 import React, { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { WrapperCountOrder, WrapperInfor, WrapperInputNumber, WrapperItemOrder, WrapperLeft, WrapperListOrder, WrapperPriceDiscount, WrapperRight, WrapperStyleHeader, WrapperTotal } from './style'
+import { WrapperCountOrder, WrapperInfor, WrapperInputNumber, WrapperItemOrder, WrapperLeft, WrapperListOrder, WrapperPriceDiscount, WrapperRight, WrapperStyleHeader, WrapperStyleHeaderDelivery, WrapperTotal } from './style'
 import { PlusOutlined, DeleteOutlined, MinusOutlined } from '@ant-design/icons';
 import { addOrderProduct, decreaseAmount, increaseAmount, removeAllOrderProduct, removeOrderProduct, selectedOrder } from '../../redux/slides/orderSlide';
 import { convertPrice } from '../../util';
@@ -15,8 +15,6 @@ import * as Message from '../../components/Message/Message'
 import { updateUser } from '../../redux/slides/useSlide';
 import { useNavigate } from 'react-router-dom';
 const OrderPage = () => {
-    const description = 'This is a description.';
-    const { Step } = Steps;
     const navigate = useNavigate()
     const [isModalOpenUpdateInfor, setIsModalOpenUpdateInfor] = useState(false)
     const dispatch = useDispatch()
@@ -77,6 +75,7 @@ const OrderPage = () => {
             })
         }
     }, [isModalOpenUpdateInfor])
+
     const handleOnchangeCheckAll = (e) => {
         if (e.target.checked) {
             const newListChecked = []
@@ -99,7 +98,6 @@ const OrderPage = () => {
             dispatch(removeAllOrderProduct({ listChecked }))
         } else {
         }
-
     }
     const priceMemo = useMemo(() => {
         const result = order?.orderItemSlected?.reduce((total, cur) => {
@@ -119,10 +117,10 @@ const OrderPage = () => {
     const diliveryPriceMemo = useMemo(() => {
         if (priceMemo <= 10000000 && priceMemo !== 0) {
             return 200000
-        } else if (priceMemo === 0 || priceMemo >= 30000000) {
-            return 0
-        } else {
+        } else if (priceMemo > 10000000 && priceMemo <= 30000000) {
             return 100000
+        } else {
+            return 0
         }
     }, [order])
     const totalPriceMemo = useMemo(() => {
@@ -175,12 +173,31 @@ const OrderPage = () => {
             [e.target.name]: e.target.value
         });
     };
+    const itemsStep = [
+        {
+            title: 'Phí giao hàng 200.000 VND',
+            description: 'Đơn hàng dưới 10 triệu',
+        },
+        {
+            title: 'Phí giao hàng 100.000 VND',
+            description: 'Đơn hàng từ 10 triệu đồng đến 30 triệu đồng',
+        },
+        {
+            title: 'Miễn phí giao hàng',
+            description: 'Đơn hàng trên 30 triệu',
+        },
+
+    ]
+
     return (
         <div style={{ background: '#f5f5fa', width: '100%', height: '100vh', fontSize: '14px' }}>
             <div style={{ height: '100%', width: '1270px', marginLeft: '84px' }}>
                 <h3>Giỏ hàng</h3>
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                     <WrapperLeft>
+                        <WrapperStyleHeaderDelivery>
+                            <Steps items={itemsStep} current={diliveryPriceMemo === 200000 ? 1 : diliveryPriceMemo === 100000 ? 2 : 3} />
+                        </WrapperStyleHeaderDelivery>
                         <WrapperStyleHeader>
                             <span style={{ margin: '10px 20px' }}>
                                 <Checkbox onChange={handleOnchangeCheckAll} checked={listChecked?.length === order?.orderItems?.length} style={{ margin: '0 5px' }} >
@@ -204,7 +221,7 @@ const OrderPage = () => {
                                         <div style={{ width: '280px', display: 'flex', alignItems: 'center', gap: 4 }}>
                                             <Checkbox onChange={onChange} value={order?.product} checked={listChecked.includes(order?.product)} style={{ margin: '0 5px' }}></Checkbox>
                                             <img src={order?.image} style={{ width: '77px', height: '79px', objectFit: 'cover' }} />
-                                            <div style={{ width: '260px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                            <div style={{ width: '260px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: '0 10px' }}>
                                                 {order?.name}
                                             </div>
                                         </div>
