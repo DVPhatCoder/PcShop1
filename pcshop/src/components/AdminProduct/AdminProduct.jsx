@@ -25,6 +25,7 @@ const AdminProduct = () => {
         }
         return text.substring(0, maxLength) + '...'; // Cắt chuỗi và thêm dấu ba chấm
     };
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const user = useSelector((state) => state?.user)
     const [rowSelected, setRowSelected] = useState('')
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false)
@@ -34,9 +35,6 @@ const AdminProduct = () => {
     const [searchedColumn, setSearchedColumn] = useState('');
     const searchInput = useRef(null);
     const innittial = () => ({
-
-    })
-    const [stateProduct, setStateProduct] = useState({
         name: '',
         type: '',
         price: '',
@@ -46,18 +44,9 @@ const AdminProduct = () => {
         description: '',
         newType: '',
         discount: '',
-
     })
-    const [stateProductDetail, setStateProductDetail] = useState({
-        name: '',
-        type: '',
-        price: '',
-        image: '',
-        countInStock: '',
-        rating: '',
-        description: '',
-        discount: '',
-    })
+    const [stateProduct, setStateProduct] = useState(innittial())
+    const [stateProductDetail, setStateProductDetail] = useState(innittial())
     const [form] = Form.useForm();
     const mutation = useMutationHooks(
         async (data) => {
@@ -160,8 +149,12 @@ const AdminProduct = () => {
         setIsPendingUpdate(false)
     }
     useEffect(() => {
-        form.setFieldsValue(stateProductDetail)
-    }, [form, stateProductDetail])
+        if (!isModalOpen) {
+            form.setFieldsValue(stateProductDetail)
+        } else {
+            form.setFieldsValue(innittial())
+        }
+    }, [form, stateProductDetail, isModalOpen])
 
     useEffect(() => {
         if (rowSelected) {
@@ -520,7 +513,7 @@ const AdminProduct = () => {
         })
         form.resetFields()
     };
-    const [isModalOpen, setIsModalOpen] = useState(false);
+
     const handleCancel = () => {
         setIsModalOpen(false);
         setStateProduct({

@@ -74,7 +74,7 @@ const createOrder = (newOrder) => {
 const getOrderDetails = (id) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const order = await Order.findOne({
+            const order = await Order.find({
                 user: id
             })
             if (order === null) {

@@ -11,6 +11,7 @@ import SignInPage from "../pages/SignInPage/SignInPage";
 import SignUpPage from "../pages/SignUpPage/SignUpPage";
 import TyperProductPage from "../pages/TypeProductPage/TyperProductPage";
 import MyOrderPage from "../pages/MyOrderPage/MyOrderPage";
+import DetailsOrderPage from "../pages/DetailsOrderPage/DetailsOrderPage";
 export const routes = [
     {
         path: '/',
@@ -50,6 +51,11 @@ export const routes = [
     {
         path: '/my-order',
         page: MyOrderPage,
+        isShowHeader: true
+    },
+    {
+        path: '/details-order/:id',
+        page: DetailsOrderPage,
         isShowHeader: true
     },
     {

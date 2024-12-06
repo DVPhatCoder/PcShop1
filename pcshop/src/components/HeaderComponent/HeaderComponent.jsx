@@ -56,7 +56,12 @@ export const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false }
             {user?.isAdmin && (
                 <WrapperContentPopup onClick={() => navigate('/system/admin')}>Quản lý hệ thống</WrapperContentPopup>
             )}
-            <WrapperContentPopup onClick={() => navigate('/my-order')}>Đơn hàng của tôi</WrapperContentPopup>
+            <WrapperContentPopup onClick={() => navigate('/my-order', {
+                state: {
+                    id: user?.id,
+                    token: user?.access_token
+                }
+            })}>Đơn hàng của tôi</WrapperContentPopup>
             <WrapperContentPopup onClick={handleLogOut}>Đăng xuất</WrapperContentPopup>
         </div>
     );
