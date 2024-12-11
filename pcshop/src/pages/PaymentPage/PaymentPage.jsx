@@ -14,6 +14,8 @@ import * as OrderServices from '../../services/OrderServices'
 import * as Message from '../../components/Message/Message'
 import { updateUser } from '../../redux/slides/useSlide';
 import { useNavigate } from 'react-router-dom';
+import { PayPalButton } from "react-paypal-button-v2";
+import * as PaymentServices from '../../services/PaymentServices'
 const PaymentPage = () => {
     const navigate = useNavigate()
     const [isModalOpenUpdateInfor, setIsModalOpenUpdateInfor] = useState(false)
@@ -22,6 +24,7 @@ const PaymentPage = () => {
     const user = useSelector((state) => state.user);
     const [delivery, setDelivery] = useState('fast')
     const [payment, setPayment] = useState('last_money')
+    const [sdkReady, setSdkReady] = useState(false)
     const [stateUserDetail, setStateUserDetail] = useState({
         name: '',
         phone: '',
@@ -76,20 +79,21 @@ const PaymentPage = () => {
     }, [order])
     const priceDiscountMemo = useMemo(() => {
         const result = order?.orderItemSlected?.reduce((total, cur) => {
-            return total + ((cur.discount * cur.amount))
-        }, 0)
-        if (Number(result)) {
-            return result
-        }
-        return 0
-    }, [order])
+            console.log('Product:', cur);
+            return total + ((cur.discount / 100) * cur.price * cur.amount);
+        }, 0);
+
+        console.log('Total Price Discount:', result); // Kiểm tra kết quả sau khi tính toán
+        return result || 0;
+    }, [order]);
+
     const diliveryPriceMemo = useMemo(() => {
-        if (priceMemo > 100000) {
-            return 10000
-        } else if (priceMemo === 0) {
-            return 0
+        if (priceMemo <= 10000000 && priceMemo !== 0) {
+            return 200000
+        } else if (priceMemo > 10000000 && priceMemo <= 30000000) {
+            return 100000
         } else {
-            return 20000
+            return 0
         }
     }, [order])
     const totalPriceMemo = useMemo(() => {
@@ -184,6 +188,46 @@ const PaymentPage = () => {
     const handlePayment = (e) => {
         setPayment(e.target.value)
     }
+    const onSuccessPaypal = (details, data) => {
+        mutationAddOrder.mutate({
+            token: user?.access_token,
+            orderItems: order?.orderItemSlected,
+            fullName: user?.name,
+            address: user?.address,
+            phone: user?.phone,
+            city: user?.city,
+            paymentMethod: payment,
+            itemsPrice: priceMemo,
+            shippingPrice: diliveryPriceMemo,
+            totalPrice: totalPriceMemo,
+            user: user?.id,
+            isPaid: true,
+            paidAt: details.update_time
+
+        }
+        )
+    }
+
+    const addPaypalScript = async () => {
+        const { data } = await PaymentServices.getConfig()
+        console.log('data', data)
+        const script = document.createElement('script')
+        script.type = 'text/javascript'
+        script.src = `https://www.paypal.com/sdk/js?client-id=${data}`
+        script.async = true
+        script.onload = () => {
+            setSdkReady(true)
+        }
+        document.body.appendChild(script)
+    }
+
+    useEffect(() => {
+        if (!window.paypal) { // nếu màn hình ko hiển thị paypal thì tải lại 
+            addPaypalScript()
+        } else {
+            setSdkReady(true)
+        }
+    }, [])
     return (
         <div style={{ background: '#f5f5fa', width: '100%', height: '100vh', fontSize: '14px' }}>
             <Loading isPending={isPendingAddOrder}>
@@ -203,7 +247,7 @@ const PaymentPage = () => {
                                 <div><label>Chọn phương thức thanh toán</label>
                                     <WrapperRadio onChange={handlePayment} value={payment}>
                                         <Radio value="last_money">Thanh toán trước khi nhận hàng</Radio>
-                                        <Radio value="scam_money">Scam</Radio>
+                                        <Radio value="paypal">Thanh toán bằng paypal</Radio>
                                     </WrapperRadio>
                                 </div>
                             </WrapperInfor>
@@ -227,8 +271,8 @@ const PaymentPage = () => {
                                         <span style={{ color: '#000', fontSize: '14px', fontWeight: 'bold' }}>{convertPrice(priceMemo)}</span>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '8px 0' }}>
-                                        <span>Giảm Giá</span>
-                                        <span style={{ color: '#000', fontSize: '14px', fontWeight: 'bold' }}>{`${priceDiscountMemo}%`}</span>
+                                        <span>Được giảm Giá</span>
+                                        <span style={{ color: '#000', fontSize: '14px', fontWeight: 'bold' }}>{convertPrice(priceDiscountMemo)}</span>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '8px 0' }}>
                                         <span>Phí giao hàng</span>
@@ -245,13 +289,27 @@ const PaymentPage = () => {
                                     </div>
                                 </WrapperTotal>
                             </div>
-                            <ButtonComponent
-                                onClick={() => handleAddOrder()}
-                                size={40}
-                                styleButton={{ background: 'rgb(255, 57,69)', height: '48px', border: 'none', borderRadius: '4px', width: '320px' }}
-                                textButton={'Đặt hàng'}
-                                styleTextButton={{ color: '#fff', fontSize: '15px', fontWeight: '700' }}>
-                            </ButtonComponent>
+                            {payment === 'paypal' && sdkReady ? (
+                                <div style={{ height: '48px', border: 'none', borderRadius: '4px', width: '320px' }}>
+                                    <PayPalButton
+                                        amount={totalPriceMemo / 25000}
+                                        // shippingPreference="NO_SHIPPING" // default is "GET_FROM_FILE"
+                                        onSuccess={onSuccessPaypal}
+                                        onError={() => {
+                                            alert('Lỗi xảy ra trong quá trình thanh toán');
+                                        }}
+                                    />
+                                </div>
+
+                            ) : (
+                                <ButtonComponent
+                                    onClick={() => handleAddOrder()}
+                                    size={40}
+                                    styleButton={{ background: 'rgb(255, 57,69)', height: '48px', border: 'none', borderRadius: '4px', width: '320px' }}
+                                    textButton={'Đặt hàng'}
+                                    styleTextButton={{ color: '#fff', fontSize: '15px', fontWeight: '700' }}>
+                                </ButtonComponent>
+                            )}
 
                         </WrapperRight>
                     </div>
@@ -322,7 +380,7 @@ const PaymentPage = () => {
                     </Loading>
 
                 </ModalComponent>
-            </Loading>
+            </Loading >
         </div >
     )
 }

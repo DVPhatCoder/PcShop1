@@ -115,7 +115,7 @@ const deleteUser = (id) => {
             }
             await User.findByIdAndDelete(id)
             resolve({
-                status: 'Thành công',
+                status: 'thành công',
                 message: 'Xóa User thành công ',
             })
         } catch (e) {
@@ -154,7 +154,7 @@ const getDetailsUser = (id) => {
                 })
             }
             resolve({
-                status: 'Thành công',
+                status: 'thành công',
                 message: 'lấy data User thành công ',
                 data: user
             })

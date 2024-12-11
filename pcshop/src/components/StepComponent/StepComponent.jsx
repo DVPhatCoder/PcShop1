@@ -6,7 +6,7 @@ const StepComponent = ({ current = 0, items = [] }) => {
     return (
         <Steps size="small" current={current}>
             {items.map((item) => (
-                <Step key={item.title} title={item.title} description={item.description} />
+                <Step key={item.title} title={item.title} description={item.description} description1={item.description1} />
             ))}
         </Steps>
     );

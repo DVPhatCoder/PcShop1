@@ -69,6 +69,7 @@ const TyperProductPage = () => {
                                             key={product._id}
                                             countInStock={product.countInStock}
                                             description={product.description}
+                                            description1={product?.description1}
                                             image={product.image}
                                             name={product.name}
                                             price={product.price}

@@ -8,7 +8,7 @@ import { convertPrice } from '../../util';
 import styled from 'styled-components';
 
 const CardComponent = (props) => {
-    const { countInStock, description, image, name, price, rating, type, discount, selled, id } = props
+    const { countInStock, description, image, name, price, rating, type, discount, selled, id, description1 } = props
 
     const navigate = useNavigate()
 

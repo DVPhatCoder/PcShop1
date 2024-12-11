@@ -5,7 +5,7 @@ dotenv.config()
 const genneralAccessToken = async (payload) => {
     const access_token = jwt.sign({
         ...payload
-    }, process.env.ACCESS_TOKEN, { expiresIn: '30s' })
+    }, process.env.ACCESS_TOKEN, { expiresIn: '15m' })
     return access_token
 }
 const genneralRefreshToken = async (payload) => {
@@ -29,7 +29,7 @@ const refreshTokenJwtService = async (token) => {
                     isAdmin: user?.isAdmin
                 })
                 resolve({
-                    status: 'Thành công',
+                    status: 'thành công',
                     message: 'lấy refresh token thành công ',
                     access_token
 

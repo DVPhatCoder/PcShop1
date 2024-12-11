@@ -43,7 +43,7 @@ const AdminPage = () => {
             <HeaderComponent isHiddenSearch isHiddenCart />
             <div style={{ display: 'flex' }}> {/* Sử dụng flexbox */}
                 <Sider
-                    width={256}
+                    width={200}
                     style={{
                         boxShadow: '1px 1px 2px #ccc',
                         background: 'white', // Có thể thay đổi màu nền

@@ -2,7 +2,7 @@ const Product = require("../models/ProductModel.js")
 
 const createProduct = (newProduct) => {
     return new Promise(async (resolve, reject) => {
-        const { name, image, type, price, countInStock, rating, description, discount } = newProduct
+        const { name, image, type, price, countInStock, rating, description, discount, description1 } = newProduct
         try {
             const checkProduct = await Product.findOne({
                 name: name,
@@ -15,7 +15,7 @@ const createProduct = (newProduct) => {
             }
 
             const newProduct = await Product.create({
-                name, image, type, price, countInStock: Number(countInStock), rating, description, discount: Number(discount)
+                name, image, type, price, countInStock: Number(countInStock), rating, description, discount: Number(discount), description1
             })
             if (newProduct) {
                 resolve({
@@ -84,7 +84,7 @@ const getDetailsProduct = (id) => {
                 })
             }
             resolve({
-                status: 'Thành công',
+                status: 'thành công',
                 message: 'lấy data Product thành công ',
                 data: product
             })
@@ -108,7 +108,7 @@ const deleteProduct = (id) => {
             }
             await Product.findByIdAndDelete(id)
             resolve({
-                status: 'Thành công',
+                status: 'thành công',
                 message: 'Xóa Product thành công ',
             })
         } catch (e) {
@@ -171,7 +171,7 @@ const deleteManyProduct = (ids) => {
                 _id: ids
             })
             resolve({
-                status: 'Thành công',
+                status: 'thành công',
                 message: 'Xóa nhiều sản phẩm thành công!',
             })
         } catch (e) {

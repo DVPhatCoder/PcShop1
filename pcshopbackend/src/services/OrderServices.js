@@ -4,13 +4,14 @@ const User = require("../models/UserModel")
 
 const createOrder = (newOrder) => {
     return new Promise(async (resolve, reject) => {
-        const { orderItems, paymentMethod, itemsPrice, shippingPrice, totalPrice, fullName, address, city, phone, user } = newOrder;
+        const { orderItems, paymentMethod, itemsPrice, shippingPrice, totalPrice, fullName, address, city, phone, user, isPaid, paidAt, isDelivered, deliveredAt } = newOrder;
         try {
-            const promises = orderItems.map(async (order) => {
+            // Kiểm tra số lượng và cập nhật kho hàng cho từng sản phẩm
+            for (const order of orderItems) {
                 const productData = await Product.findOneAndUpdate(
-                    {//tim san pham co id la product va co countinstock du de ban
+                    {
                         _id: order?.product,
-                        countInStock: { $gte: order?.amount },
+                        countInStock: { $gte: order?.amount }, // Đảm bảo sản phẩm có đủ trong kho
                     },
                     {
                         $inc: {
@@ -18,60 +19,48 @@ const createOrder = (newOrder) => {
                             selled: +order?.amount, // Tăng số lượng đã bán
                         },
                     },
-                    { new: true } // Trả về dữ liệu đã cập nhật
+                    { new: true } // Trả về dữ liệu sau cập nhật
                 );
-                console.log('productData', productData)
-                if (productData) { // Nếu sản phẩm đủ số lượng, tạo đơn hàng
-                    const createOrder = await Order.create({
-                        orderItems,
-                        shippingAddress: {
-                            fullName,
-                            address,
-                            city,
-                            phone,
-                        },
-                        paymentMethod,
-                        itemsPrice,
-                        shippingPrice,
-                        totalPrice,
-                        user: user,
-                    });
-                    if (createOrder) {
-                        return {
-                            status: 'thành công',
-                            message: 'Đặt hàng thành công!',
-                        };
-                    }
-                } else {
-                    return {
+
+                if (!productData) {
+                    return resolve({
                         status: 'thất bại',
-                        message: 'Đặt hàng không thành công!',
-                        id: order?.product, // ID sản phẩm không hợp lệ
-                    };
+                        message: `Sản phẩm với ID ${order?.product} không đủ số lượng.`,
+                    });
                 }
+            }
+            // Tạo một đơn hàng duy nhất cho tất cả sản phẩm
+            const createdOrder = await Order.create({
+                orderItems,
+                shippingAddress: {
+                    fullName,
+                    address,
+                    city,
+                    phone,
+                },
+                paymentMethod,
+                itemsPrice,
+                shippingPrice,
+                totalPrice,
+                user,
+                isPaid,
+                paidAt,
+                isDelivered,
+                deliveredAt
             });
 
-            // Chờ tất cả các promises hoàn thành
-            const results = await Promise.all(promises);
-            const newData = results && results.filter((item) => item.id)//tra ve gia tri nhung san pham co id ko hop le
-            if (newData.length) {
-                resolve({
-                    status: 'thất bại',
-                    message: `sản phẩm với id${newData.join(', ')} đã hết hàng `
-                })
-            } else {
-                resolve({
-                    status: 'thành công',
-                    message: 'Đặt hàng thành công',
-                })
-            }
-            console.log('results', results);
+            resolve({
+                status: 'thành công',
+                message: 'Đặt hàng thành công!',
+                data: createdOrder,
+            });
         } catch (e) {
             reject(e); // Xử lý lỗi nếu có
         }
     });
 };
-const getOrderDetails = (id) => {
+
+const getAllOrderDetails = (id) => {
     return new Promise(async (resolve, reject) => {
         try {
             const order = await Order.find({
@@ -84,7 +73,7 @@ const getOrderDetails = (id) => {
                 })
             }
             resolve({
-                status: 'Thành công',
+                status: 'thành công',
                 message: 'lấy data Order thành công ',
                 data: order
             })
@@ -93,7 +82,51 @@ const getOrderDetails = (id) => {
         }
     })
 }
+const getOrderDetails = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const order = await Order.findById({
+                _id: id
+            })
+            if (order === null) {
+                resolve({
+                    status: 'Lỗi',
+                    message: 'Không tìm thấy sản phẩm!',
+                })
+            }
+            resolve({
+                status: 'thành công',
+                message: 'lấy data Order thành công ',
+                data: order
+            })
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+const cancelOrderDetails = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const checkOrder = await Order.findByIdAndDelete(id)
+            if (checkOrder === null) {
+                resolve({
+                    status: 'Lỗi',
+                    message: 'Không tìm thấy sản phẩm!',
+                })
+            }
+            resolve({
+                status: 'thành công',
+                message: 'Xóa Order thành công ',
+            })
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
 module.exports = {
     createOrder,
-    getOrderDetails
+    getAllOrderDetails,
+    getOrderDetails,
+    cancelOrderDetails
+
 };

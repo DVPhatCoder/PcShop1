@@ -48,14 +48,19 @@ const OrderPage = () => {
             setListChecked([...listChecked, e.target.value])
         }
     }
-    const handleChangeCount = (type, idProduct) => {
+    const handleChangeCount = (type, idProduct, max) => {
         if (type === 'increase') {
-            dispatch(increaseAmount({ idProduct }))
-        } else {
-            dispatch(decreaseAmount({ idProduct }))
+            const product = order.orderItems.find((item) => item.product === idProduct);
+            if (product.amount < max) {
+                dispatch(increaseAmount({ idProduct }));
+            } else {
+                Message.error('Số lượng vượt quá số lượng trong kho!');
+            }
+        } else if (type === 'decrease') {
+            dispatch(decreaseAmount({ idProduct }));
         }
+    };
 
-    }
 
     useEffect(() => {
         form.setFieldsValue(stateUserDetail)
@@ -107,13 +112,11 @@ const OrderPage = () => {
     }, [order])
     const priceDiscountMemo = useMemo(() => {
         const result = order?.orderItemSlected?.reduce((total, cur) => {
-            return total + ((cur.discount * cur.amount))
-        }, 0)
-        if (Number(result)) {
-            return result
-        }
-        return 0
-    }, [order])
+            return total + ((cur.discount / 100) * cur.price * cur.amount);
+        }, 0);
+        return result || 0;
+    }, [order]);
+
     const diliveryPriceMemo = useMemo(() => {
         if (priceMemo <= 10000000 && priceMemo !== 0) {
             return 200000
@@ -209,6 +212,7 @@ const OrderPage = () => {
                             <div style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'space-around', paddingLeft: '100px' }}>
                                 <span>Đơn giá</span>
                                 <span>Số lượng</span>
+                                <span>Giảm giá</span>
                                 <span>Thành Tiền</span>
                                 <DeleteOutlined style={{ cursor: 'pointer' }} onClick={handleRemoveAllOrder} />
                             </div>
@@ -226,7 +230,7 @@ const OrderPage = () => {
                                             </div>
                                         </div>
                                         <div style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                            <span style={{ display: 'flex', width: '100px' }}>
+                                            <span style={{ display: 'flex' }}>
                                                 <span style={{ fontSize: '13px', color: '#242424' }}>
                                                     {convertPrice(order?.price)}
                                                 </span>
@@ -236,12 +240,23 @@ const OrderPage = () => {
                                                     <MinusOutlined style={{ color: '#000', fontSize: '20px' }} size="10px" />
                                                 </button>
                                                 <WrapperInputNumber defaultValue={order?.amount} value={order?.amount} size="small" />
-                                                <button style={{ border: 'none', background: 'transparent', cursor: 'pointer' }} onClick={() => handleChangeCount('increase', order?.product)}>
+                                                <button
+                                                    style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}
+                                                    onClick={() => handleChangeCount('increase', order?.product, order?.countInStock)}
+                                                >
                                                     <PlusOutlined style={{ color: '#000', fontSize: '20px' }} size="10px" />
                                                 </button>
+
                                             </WrapperCountOrder>
-                                            <span style={{ color: 'rgb(255,66,78)', fontSize: '13px', fontWeight: 500, width: '110px' }}>{convertPrice(order?.price * order?.amount)} </span>
+                                            <span style={{ display: 'flex', width: '10px' }}>
+                                                <span style={{ fontSize: '13px', color: '#242424' }}>
+                                                    {order?.discount || 0}%
+                                                </span>
+                                            </span>
+                                            <span style={{ color: 'rgb(255,66,78)', fontSize: '13px', fontWeight: 500, }}>{convertPrice(order?.price * order?.amount)} </span>
+
                                             <DeleteOutlined style={{ cursor: 'pointer', marginRight: '25px' }} onClick={() => handleDelteOrder(order?.product)} />
+
                                         </div>
                                     </WrapperItemOrder>
                                 )
@@ -250,6 +265,7 @@ const OrderPage = () => {
                         </WrapperListOrder>
                     </WrapperLeft>
                     <WrapperRight>
+
                         <div style={{ width: '100%' }}>
                             <WrapperInfor style={{ background: '#FFFFFD', marginBottom: '10px' }} >
                                 <div style={{ display: 'flex', alignItems: 'center', }}>
@@ -267,10 +283,12 @@ const OrderPage = () => {
                                     </span>
                                     <span style={{ color: '#000', fontSize: '14px', fontWeight: 'bold' }}>{convertPrice(priceMemo)}</span>
                                 </div>
+
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '8px 0' }}>
-                                    <span>Giảm Giá</span>
-                                    <span style={{ color: '#000', fontSize: '14px', fontWeight: 'bold' }}>{`${priceDiscountMemo}%`}</span>
+                                    <span>Được giảm Giá</span>
+                                    <span style={{ color: '#000', fontSize: '14px', fontWeight: 'bold' }}>{convertPrice(priceDiscountMemo)}</span>
                                 </div>
+
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '8px 0' }}>
                                     <span>Phí giao hàng</span>
                                     <span style={{ color: '#000', fontSize: '14px', fontWeight: 'bold' }}>{convertPrice(diliveryPriceMemo)}</span>

@@ -15,9 +15,6 @@ import { DrawComponent } from '../DrawComponent/DrawComponent';
 import { useSelector } from 'react-redux';
 import { ModalComponent } from '../ModalComponent/ModalComponent';
 
-
-
-
 const AdminProduct = () => {
     const truncateText = (text, maxLength) => {
         if (text.length <= maxLength) {
@@ -44,6 +41,7 @@ const AdminProduct = () => {
         description: '',
         newType: '',
         discount: '',
+        description1: '',
     })
     const [stateProduct, setStateProduct] = useState(innittial())
     const [stateProductDetail, setStateProductDetail] = useState(innittial())
@@ -60,6 +58,7 @@ const AdminProduct = () => {
                     description,
                     countInStock,
                     discount,
+                    description1,
                 } = data;
                 const res = await ProductServices.createProduct({
                     name,
@@ -70,6 +69,7 @@ const AdminProduct = () => {
                     description,
                     countInStock,
                     discount,
+                    description1,
                 });
                 return res;
             } catch (error) {
@@ -119,22 +119,20 @@ const AdminProduct = () => {
             [e.target.name]: e.target.value
         });
     };
-
     const handleOnChangeDetail = (e) => {
         setStateProductDetail({
             ...stateProductDetail,
             [e.target.name]: e.target.value
         });
     };
-
     const getAllProduct = async () => {
         const res = await ProductServices.getAllProduct()
         return res
     }
-
     const fetchGetDetailsProduct = async (rowSelected) => {
         const res = await ProductServices.getDetailsProduct(rowSelected);
         if (res?.data) {
+            console.log('data', data)
             setStateProductDetail({
                 name: res?.data?.name,
                 type: res?.data?.type,
@@ -144,6 +142,7 @@ const AdminProduct = () => {
                 rating: res?.data?.rating,
                 image: res?.data?.image,
                 discount: res?.data?.discount,
+                description1: res?.data?.description1,
             })
         }
         setIsPendingUpdate(false)
@@ -197,7 +196,6 @@ const AdminProduct = () => {
         setSearchText('');
 
     };
-
     const renderAction = () => {
         return (
             <div style={{ fontSize: '25px', cursor: 'pointer' }}>
@@ -206,7 +204,6 @@ const AdminProduct = () => {
             </div>
         )
     }
-
     const getColumnSearchProps = (dataIndex) => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
             <div
@@ -273,20 +270,6 @@ const AdminProduct = () => {
                 setTimeout(() => searchInput.current?.select(), 100);
             }
         },
-        // render: (text) =>
-        //   searchedColumn === dataIndex ? (
-        //     <Highlighter
-        //       highlightStyle={{
-        //         backgroundColor: '#ffc069',
-        //         padding: 0,
-        //       }}
-        //       searchWords={[searchText]}
-        //       autoEscape
-        //       textToHighlight={text ? text.toString() : ''}
-        //     />
-        //   ) : (
-        //     text
-        //   ),
     });
     const columns = [
         {
@@ -369,7 +352,6 @@ const AdminProduct = () => {
                 }
             },
         },
-
         {
             title: 'Đánh giá',
             dataIndex: 'rating',
@@ -440,12 +422,6 @@ const AdminProduct = () => {
             },
         },
         {
-            title: 'Mô tả',
-            dataIndex: 'description',
-            sorter: (a, b) => a.type.localeCompare(b.type, 'vi'),
-            render: (text) => truncateText(text, 20), // Giới hạn 20 ký tự
-        },
-        {
             title: 'Action',
             dataIndex: 'action',
             render: renderAction
@@ -468,7 +444,6 @@ const AdminProduct = () => {
             Message.error('Có lỗi xảy ra khi tạo!'); // Thông báo lỗi
         }
     }, [isSuccess, isError, data])
-
     useEffect(() => {
         if (isSuccessUpdated) {
             if (dataUpdated?.status === 'thành công') {
@@ -481,7 +456,6 @@ const AdminProduct = () => {
             Message.error('Có lỗi xảy ra khi Cập nhập!'); // Thông báo lỗi
         }
     }, [isSuccessUpdated, isErrorUpdated, dataUpdated]);
-
     useEffect(() => {
         if (isSuccessDeleted) {
             Message.success('Xóa sản phẩm thành công!');
@@ -490,7 +464,6 @@ const AdminProduct = () => {
             Message.error('Có lỗi xảy ra khi xóa!');
         }
     }, [isSuccessDeleted, isErrorDeleted, dataDeleted]);
-
     useEffect(() => {
         if (isSuccessDeletedMany) {
             Message.success('Xóa nhiều sản phẩm thành công!');
@@ -510,10 +483,10 @@ const AdminProduct = () => {
             rating: '',
             description: '',
             discount: '',
+            description1: '',
         })
         form.resetFields()
     };
-
     const handleCancel = () => {
         setIsModalOpen(false);
         setStateProduct({
@@ -525,6 +498,7 @@ const AdminProduct = () => {
             rating: '',
             description: '',
             discount: '',
+            description1: '',
         })
         form.resetFields()
     };
@@ -538,7 +512,6 @@ const AdminProduct = () => {
             }
         })
     }
-
     const onFinish = () => {
         const params = {
             name: stateProduct.name,
@@ -548,7 +521,8 @@ const AdminProduct = () => {
             countInStock: stateProduct.countInStock,
             rating: stateProduct.rating,
             description: stateProduct.description,
-            discount: stateProduct.discount
+            discount: stateProduct.discount,
+            description1: stateProduct.description1,
         }
         mutation.mutate(params, {
             onSettled: () => {
@@ -556,7 +530,6 @@ const AdminProduct = () => {
             }
         })
     }
-
     const handleOnchangeAvatar = async ({ fileList }) => {
         const file = fileList[0]
         if (!file.url && !file.preview) {
@@ -567,7 +540,6 @@ const AdminProduct = () => {
             image: file.preview
         });
     }
-
     const handleOnchangeAvatarDetail = async ({ fileList }) => {
         const file = fileList[0]
         if (!file.url && !file.preview) {
@@ -578,15 +550,15 @@ const AdminProduct = () => {
             image: file.preview
         });
     }
-
     const onUpdateProduct = () => {
         mutationUpdate.mutate({
             id: rowSelected,
             token: user?.access_token,
             ...stateProductDetail
         }, {
-            onSettled: () => {
+            onSuccess: () => {
                 queryProduct.refetch()
+                Message.success('Đơn hàng đã được hủy thành công!');
             }
         });
     }
@@ -625,7 +597,7 @@ const AdminProduct = () => {
                                 span: 18,
                             }}
                             style={{
-                                maxWidth: 600,
+                                maxWidth: 700,
                             }}
                             onFinish={onFinish}
                             autoComplete="off"
@@ -655,10 +627,6 @@ const AdminProduct = () => {
                             >
                                 <Select
                                     name="type"
-                                    // defaultValue="lucy"
-                                    // style={{
-                                    //     width: 120,
-                                    // }}
                                     value={stateProduct.type}
                                     onChange={handleChangeSelect}
                                     options={renderOptions(typeProduct?.data?.data)}
@@ -701,6 +669,18 @@ const AdminProduct = () => {
                                 ]}
                             >
                                 <InputComponent value={stateProduct.countInStock} onChange={handleOnChange} name="countInStock" />
+                            </Form.Item>
+                            <Form.Item
+                                label="Thông số"
+                                name="description1"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: 'Vui lòng nhập thông số sản phẩm!',
+                                    },
+                                ]}
+                            >
+                                <InputComponent value={stateProduct.description1} onChange={handleOnChange} name="description1" />
                             </Form.Item>
                             <Form.Item
                                 label="Mô tả"
@@ -829,6 +809,18 @@ const AdminProduct = () => {
                                 ]}
                             >
                                 <InputComponent value={stateProductDetail.countInStock} onChange={handleOnChangeDetail} name="countInStock" />
+                            </Form.Item>
+                            <Form.Item
+                                label="Thông số"
+                                name="description1"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: 'Vui lòng nhập thông số sản phẩm!',
+                                    },
+                                ]}
+                            >
+                                <InputComponent value={stateProductDetail.description1} onChange={handleOnChangeDetail} name="description1" />
                             </Form.Item>
                             <Form.Item
                                 label="Mô tả"

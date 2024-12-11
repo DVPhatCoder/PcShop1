@@ -18,6 +18,9 @@ const orderSchema = new mongoose.Schema({
                 type: Number,
                 required: [true, 'không được để trống '],
             },
+            discount: {
+                type: Number,
+            },
             product: { // join bảng product vào trong orderproduct
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'Product',
